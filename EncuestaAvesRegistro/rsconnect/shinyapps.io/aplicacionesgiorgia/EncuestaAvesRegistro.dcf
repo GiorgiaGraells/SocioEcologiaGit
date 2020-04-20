@@ -1,0 +1,12 @@
+name: EncuestaAvesRegistro
+title: EncuestaAvesRegistro
+username:
+account: aplicacionesgiorgia
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 1012030
+bundleId: 2201504
+url: https://aplicacionesgiorgia.shinyapps.io/EncuestaAvesRegistro/
+when: 1562296600.22998
+asMultiple: FALSE
+asStatic: FALSE
