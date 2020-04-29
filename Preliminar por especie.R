@@ -141,11 +141,13 @@ Avance2 <- Avance2 %>% mutate(Conoce_especie= ifelse(Conoce_especie==2 , 0, 1))
 
 write_csv(Avance2, "DatosAvance2.csv")
 
+Avance2 <- Avance2 %>% mutate(Ambiente=fct_relevel(Ambiente, "Urbano", "Verde", "RocaInt", "PlayaInt", "PlayaNat"))
+Avance2 <- Avance2 %>% mutate(Especie=fct_relevel(Especie, "Columba", "Zonotrichia", "Turdus", "Larus", "Phalacrocorax"))
 
 ##############
 #general
 
-Avance2 <- Avance2 %>% mutate(Ambiente=fct_relevel(Ambiente, "Urbano", "Verde", "RocaInt", "PlayaInt", "PlayaNat"))
+
 ggplot(Avance2, aes(x=Ambiente, y=Beneficio_sp_amb)) + geom_violin() +geom_jitter(aes(color=Especie))+theme_classic()+
   xlab("Ambientes")+ ylab("Bienestar al ver aves")
 
@@ -256,8 +258,10 @@ ggplot(Avance2Terrestre, aes(x=FrecPercibida, y=Beneficio_sp_amb))+ geom_smooth(
   ggplot(Avance2, aes(x=FrecPercibida, y=Beneficio_sp_amb))+geom_smooth(method=lm, se=FALSE,aes(color=Genero))+geom_point(aes(color=Genero))+ 
     xlab("Frecuencia percibida por especie")+ylab("Beneficio percibido por especie") + facet_wrap(~Especie)+theme_classic()
   
+  Avance2 <- Avance2 %>% mutate(Especie=fct_relevel(Especie, "Columba", "Zonotrichia", "Turdus", "Larus", "Phalacrocorax"))
+  
   ggplot(Avance2, aes(x=FrecPercibida, y=Beneficio_sp_amb))+geom_smooth(method=lm, se=FALSE,aes(color=Ambiente))+geom_point(aes(color=Ambiente))+ 
-    xlab("Frecuencia avistamiento percibida por especie")+ylab("Beneficio percibido por especie") + facet_wrap(~Especie)+theme_classic()
+    xlab("Frecuencia avistamiento percibida por especie")+ylab("Bienestar percibido por especie") + facet_wrap(~Especie)+theme_classic()
   
   ###conocimiento aves
   Avance2$Conoce_especie <- as.character( Avance2$Conoce_especie)
