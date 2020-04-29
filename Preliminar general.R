@@ -96,13 +96,15 @@ ggplot(DF3, aes(x = fct_reorder(AmbOrigen,n, .desc=TRUE), y = n)) + geom_col(aes
   theme(axis.text.x = element_text(angle=45, vjust= 1, hjust=1))
 
 
+#####graficos 700x400
+
 #distancia residencia
-ggplot(DF) + geom_bar(aes(Distancia_residenciaKm))+ labs(y="Número de encuestas", x="Distancia a la que vive de la costa")  + theme_classic() +
+ggplot(DF) + geom_histogram(aes(Distancia_residenciaKm), color="darkblue", bins = 6)+ labs(y="Número de encuestas", x="Residencia del mar (Km)")  + theme_classic() +
   scale_fill_brewer(palette = "Dark2") + theme(text=element_text(size=18,  family="Arial"))
 
-Res<- DF %>% group_by(Distancia_residenciaKm) %>% summarise(N = n())
-ggplot(Res, aes(x = Distancia_residenciaKm, y=N)) + geom_point(aes( Distancia_residenciaKm)) + stat_smooth(aes(Distancia_residenciaKm), method = "lm", color ="black", formula=y ~ x + I(x^2), alpha=0.5)+
-  theme_classic()+ ylab("Número de encuestas")+ xlab("Residencia del mar (Km)")+ scale_fill_brewer(palette="Dark2") + theme(text=element_text(size=18,  family="Arial"))
+#Res<- DF %>% group_by(Distancia_residenciaKm) %>% summarise(N = n())
+#ggplot(Res, aes(x = Distancia_residenciaKm, y=N)) + geom_point(aes( Distancia_residenciaKm)) + stat_smooth(aes(Distancia_residenciaKm), method = "lm", color ="black", formula=y ~ x + I(x^2), alpha=0.5)+
+#  theme_classic()+ ylab("Número de encuestas")+ xlab("Residencia del mar (Km)")+ scale_fill_brewer(palette="Dark2") + theme(text=element_text(size=18,  family="Arial"))
 
 #Ocupación
 ggplot(DF) + geom_bar(aes(Ocu_agrupado))+ labs(y="Número de encuestas", x="Ocupación")  + theme_classic() +
@@ -117,7 +119,7 @@ ggplot(DF) + geom_bar(aes(Relacion_MarNCP))+ labs(y="Número de encuestas", x="C
 
 
 #Ver ingresos percapita
-ggplot(DF) + geom_bar(aes(Ingreso_percap))+ labs(y="Número de encuestas", x="Promedio ingreso per cápita")  + theme_classic() +
+ggplot(DF) + geom_histogram(aes(Ingreso_percap), color="darkred", bins = 6)+ labs(y="Número de encuestas", x="Promedio ingreso per cápita")  + theme_classic() +
   scale_fill_brewer(palette = "Dark2") + theme(text=element_text(size=18,  family="Arial"))
 
 ING<- DF %>% group_by(Ingreso_percap) %>% summarise(N = n())
@@ -126,8 +128,7 @@ ggplot(ING, aes(x = Ingreso_percap, y=N)) + geom_point(aes( Ingreso_percap)) +
   theme_classic()+ ylab("Número de encuestas")+ xlab("Ingreso per cápita")+ scale_fill_brewer(palette="Dark2") +
   theme(text=element_text(size=18,  family="Arial"))
 
-ggplot(DF, aes(Ingreso_percap)) +  geom_histogram()+labs(y="Número de encuestas", x="Promedio ingreso per cápita")  + theme_classic() +
-  scale_fill_brewer(palette = "Dark2") + theme(text=element_text(size=18,  family="Arial"))
+
 
 
 #edad
@@ -135,7 +136,7 @@ anos<- DF %>% group_by(Edad) %>% summarise(N = n())
 ggplot(anos, aes(x = Edad, y=N)) + geom_point(aes(Edad)) + stat_smooth(aes(Edad), method = "lm", color ="black", formula=y ~ x + I(x^2), alpha=0.5)+ 
   theme_classic()+ ylab("Número de encuestas")+ xlab("Edad de encuestados")+ scale_fill_brewer(palette="Dark2") + theme(text=element_text(size=18,  family="Arial"))
 
-ggplot(DF) + geom_bar(aes(Edad))+ labs(y="Número de encuestas", x="Edad")  + theme_classic() +
+ggplot(DF) + geom_histogram(aes(Edad), color="darkgreen", bins = 6)+ labs(y="Número de encuestas", x="Edad")  + theme_classic() +
   scale_fill_brewer(palette = "Dark2") + theme(text=element_text(size=18,  family="Arial"))
 
 #ingresos

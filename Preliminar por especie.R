@@ -145,7 +145,7 @@ Avance2 <- Avance2 %>% mutate(Ambiente=fct_relevel(Ambiente, "Urbano", "Verde", 
 Avance2 <- Avance2 %>% mutate(Especie=fct_relevel(Especie, "Columba", "Zonotrichia", "Turdus", "Larus", "Phalacrocorax"))
 
 ##############
-#general
+#general 600x400
 
 
 ggplot(Avance2, aes(x=Ambiente, y=Beneficio_sp_amb)) + geom_violin() +geom_jitter(aes(color=Especie))+theme_classic()+
@@ -179,10 +179,10 @@ ggplot(Avance2, aes(x=FrecPercibida, y=Beneficio_sp_amb))+ geom_smooth(method=lm
 
 Avance2 <- Avance2 %>% mutate(Ambiente=fct_relevel(Ambiente, "Urbano", "Verde", "RocaInt", "PlayaInt", "PlayaNat"))
 ggplot(Avance2, aes(x=FrecPercibida, y=Beneficio_sp_amb))+ geom_smooth(method=lm, se=FALSE,aes(color=Ambiente))+
-  geom_point(aes(color=Ambiente))+theme_classic()+ xlab("Frecuencia percibida")+ylab("Beneficio percibido por especie por ambiente")
+  geom_point(aes(color=Ambiente))+theme_classic()+ xlab("Frecuencia percibida")+ylab("Bienestar percibido por especie por ambiente")
 
 ggplot(Avance2, aes(x=FrecPercibida, y=Beneficio_sp_amb))+ geom_smooth(method=lm, se=FALSE,aes(color=Especie))+
-  geom_point(aes(color=Especie))+theme_classic()+ xlab("Frecuencia percibida")+ylab("Beneficio percibido por especie por ambiente")
+  geom_point(aes(color=Especie))+theme_classic()+ xlab("Frecuencia percibida")+ylab("Bienestar percibido por especie por ambiente")
 
 
 Avance2 <- Avance2 %>% mutate(Ambiente=fct_relevel(Ambiente, "Urbano", "Verde", "RocaInt", "PlayaInt", "PlayaNat"))
