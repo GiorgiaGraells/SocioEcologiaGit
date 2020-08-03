@@ -116,27 +116,70 @@ Avance <- Avance %>% mutate(DesagradoCH= case_when(
   Desagrado %in% 5~"Nada le desagrada"))
 
 
-write_csv(Avance, "DatosAvance.csv")
+saveRDS(Avance, "DatosAvance.rds")
 
 
-##############
+#####################
+#correr desde aca
+
+Avance <- readRDS("DatosAvance.rds") %>%  mutate(Ambiente_encuesta= case_when(
+  Sitio %in% c("CASA", "LAS SIRENAS", "PARQUE EL LITRE", "PLAZA RECREO", "PLAZA GABRIELA MISTRAL")~"VERDE",
+  Sitio %in% c("LAGHU YOGA", "RENACA CENTRO")~"URBANO",
+  Sitio %in% c("LAGUNA VERDE", "PLAYA NEGRA", "HUMEDAL RENACA", "LAS SALINAS")~"PLAYA NATURAL",
+  Sitio %in% c("PLAYA AMARILLA", "SECTOR 5", "LOS LILENES")~"PLAYA INTERVENIDA",
+  Sitio %in% c("ROCA OCEANICA")~"ROCA NATURAL",
+  Sitio %in% c("CLUB YATES", "MUELLE BARON")~"ROCA INTERVENIDA"))
+
 # Figuras por ambiente
 
 Avance <- Avance %>% mutate(Ambiente=fct_relevel(Ambiente, "Urbano", "Verde", "RocaInt", "PlayaInt", "PlayaNat"))
 ggplot(Avance, aes(x=Ambiente, y=Ambiente_bienestar)) + geom_violin() +geom_jitter(aes(color=Ambiente))+theme_classic()+
   xlab("Ambientes")+ ylab("Bienestar al ver aves")
 
+#considerando el ambiente donde se realizó la encuesta
+
+Avance <- Avance %>% mutate(Ambiente_encuesta=fct_relevel(Ambiente_encuesta, "URBANO", "VERDE", "PLAYA INTERVENIDA", "PLAYA NATURAL"))
+ggplot(Avance, aes(x=Ambiente, y=Ambiente_bienestar)) + geom_violin() +geom_jitter(aes(color=Ambiente_encuesta))+theme_classic()+
+  xlab("Ambiente preguntado")+ ylab("Bienestar al ver aves")+ facet_wrap(~Ambiente_encuesta)+theme(axis.text.x = element_text(angle=45, vjust= 1, hjust=1))
+
+##################
+
 #Bienestar vs frecuencia de visita 
+
+#por ambiente preguntado
 ggplot(Avance, aes(x=Frec_visita, y=Ambiente_bienestar))+ geom_smooth(method=lm, se=FALSE,aes(color=Ambiente)) +
   geom_point(aes(color=Ambiente))+ xlab("Frecuencia de visita") +ylab("Bienestar al ver aves")+ theme_classic()
 #las personas que suelen visitar mas un ambiente suelen percibir un mayor bienestar al visitarlo
 #mientras mas natural el ambiente, las personas perciben alto bienestar aun cuando no lo visiten con mucha frecuencia
 
+#considerando donde se realizo la encuesta
+ggplot(Avance, aes(x=Frec_visita, y=Ambiente_bienestar))+ geom_smooth(method=lm, se=FALSE,aes(color=Ambiente)) +
+  geom_point(aes(color=Ambiente))+ xlab("Frecuencia de visita") +ylab("Bienestar al ver aves")+ facet_wrap(~Ambiente_encuesta)+
+  theme_classic()
+
+#Bienestar vs frecuencia de visita , considerando donde se realizo la encuesta
+ggplot(Avance, aes(x=Ambiente_encuesta, y=Frec_visita))+  geom_violin() +geom_jitter(aes(color=Ambiente))+
+ xlab("Ambientes") +ylab("Frecuencia de visita")+ facet_wrap(~Ambiente_bienestar)+
+  theme_classic()+theme(axis.text.x = element_text(angle=45, vjust= 1, hjust=1))
+
+ggplot(Avance, aes(x=Ambiente, y=Ambiente_bienestar)) + geom_violin() +geom_jitter(aes(color=Frec_visita))+theme_classic()+
+  xlab("Ambiente")+ ylab("Bienestar al ver aves")+ facet_wrap(~Frec_visita,4)+theme(axis.text.x = element_text(angle=45, vjust= 1, hjust=1))
+
+#considerando amb preuntado y donde se realizó la encuesta
+ggplot(Avance, aes(x=Ambiente, y=Ambiente_bienestar)) + geom_violin() +geom_jitter(aes(color=Ambiente_encuesta))+theme_classic()+
+  xlab("Ambiente")+ ylab("Bienestar al ver aves")+ facet_wrap(~Frec_visita,4)+theme(axis.text.x = element_text(angle=45, vjust= 1, hjust=1))
+
+#considerando amb preuntado y donde se realizó la encuesta
+ggplot(Avance, aes(x=Ambiente, y=Ambiente_bienestar)) + geom_violin() +geom_jitter(aes(color=Frec_visita))+theme_classic()+
+  xlab("Ambiente")+ ylab("Bienestar al ver aves")+ facet_wrap(~Ambiente_encuesta)+theme(axis.text.x = element_text(angle=45, vjust= 1, hjust=1))
+
+
+
 #con logit
 #ggplot(Avance, aes(x=Frec_visita, y= log((Ambiente_bienestar-1)/(6-(Ambiente_bienestar-1)))) )+ geom_smooth(method=lm, se=FALSE,aes(color=Ambiente)) +
 #   geom_point(aes(color=Ambiente))+ xlab("Frecuencia de visita") +ylab("Bienestar al ver aves")
 
-  
+ ################## 
 #Bienestar vs distancia residencia
 
 ggplot(Avance, aes(x=Distancia_residenciaKm, y=Ambiente_bienestar)) + geom_smooth(method=lm, se=FALSE,aes(color=Ambiente))+
@@ -165,7 +208,15 @@ ggplot(Avance, aes(x=Ambiente, y=Ambiente_bienestar)) + geom_violin() +geom_jitt
 ggplot(Avance, aes(x=Ambiente, y=Ambiente_bienestar)) + geom_violin() +geom_jitter(aes(color=AgradoCH))+
   theme_classic()+ xlab("Ambientes")+ ylab("Bienestar al ver aves")+theme(axis.text.x = element_text(angle=60, vjust= 1, hjust=1))
 
-ggplot(Avance, aes(x=Ambiente, y=Ambiente_bienestar)) + geom_violin() +geom_jitter(aes(color=DesagradoCH))+
-  theme_classic()+ xlab("Amientes")+ ylab("Bienestar al ver aves")+theme(axis.text.x = element_text(angle=60, vjust= 1, hjust=1))
+Avance2 <-Avance  %>% dplyr::filter(AgradoCH!="Nada le agrada")
+ggplot(Avance2, aes(x=Ambiente, y=Ambiente_bienestar)) + geom_violin() +geom_jitter(aes(color=AgradoCH))+
+  theme_classic()+ xlab("Ambientes")+ ylab("Bienestar al ver aves")+theme(axis.text.x = element_text(angle=60, vjust= 1, hjust=1))
 
+
+ggplot(Avance, aes(x=Ambiente, y=Ambiente_bienestar)) + geom_violin() +geom_jitter(aes(color=DesagradoCH))+
+  theme_classic()+ xlab("Ambientes")+ ylab("Bienestar al ver aves")+theme(axis.text.x = element_text(angle=60, vjust= 1, hjust=1))
+
+Avance2 <-Avance  %>% dplyr::filter(DesagradoCH!="Nada le desagrada")
+ggplot(Avance2, aes(x=Ambiente, y=Ambiente_bienestar)) + geom_violin() +geom_jitter(aes(color=DesagradoCH))+
+  theme_classic()+ xlab("Ambientes")+ ylab("Bienestar al ver aves")+theme(axis.text.x = element_text(angle=60, vjust= 1, hjust=1))
 

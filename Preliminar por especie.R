@@ -255,7 +255,8 @@ ggplot(Avance2Terrestre, aes(x=FrecPercibida, y=Beneficio_sp_amb))+ geom_smooth(
 
   
 #facet wrap  (900x500)
-  ggplot(Avance2, aes(x=FrecPercibida, y=Beneficio_sp_amb))+geom_smooth(method=lm, se=FALSE,aes(color=Genero))+geom_point(aes(color=Genero))+ 
+  
+ggplot(Avance2, aes(x=FrecPercibida, y=Beneficio_sp_amb))+geom_smooth(method=lm, se=FALSE,aes(color=Genero))+geom_point(aes(color=Genero))+ 
     xlab("Frecuencia percibida por especie")+ylab("Beneficio percibido por especie") + facet_wrap(~Especie)+theme_classic()
   
   Avance2 <- Avance2 %>% mutate(Especie=fct_relevel(Especie, "Columba", "Zonotrichia", "Turdus", "Larus", "Phalacrocorax"))

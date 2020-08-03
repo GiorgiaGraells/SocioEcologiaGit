@@ -4,7 +4,7 @@
   library(tidyverse)
   library(ggplot2)
   
-  DF <- read_csv("/home/giorgia/Documents/Doctorado tesis/Encuesta/EncuestaAvesRegistro/respuestas_COMPLETO.csv") %>%  select(-contains("_otro")) 
+  DF <- read_csv("/home/giorgia/Documents/Doctorado tesis/SocioEcologiaGit/EncuestaAvesRegistro/respuestas_COMPLETO.csv") %>%  select(-contains("_otro")) 
   
   #### Modificacion variables para analisis
   
@@ -39,6 +39,8 @@
                                                                     Participacion_avistamiento == 3 ~ 0.50,
                                                                     Participacion_avistamiento == 4 ~ 1))
   
+ # No se a q corresponde esta parte (27 julio 2020)
+################################################  
   DF <- DF %>% mutate(AgradoCH= case_when(
     Agrado %in% 1~"Estética (color, forma, tamaño)",
     Agrado %in% 2~"Comportamiento (canto, vuelo, alimentación)",
@@ -52,7 +54,8 @@
     Desagrado %in% 3~"Familiaridad (intrusiva)",
     Desagrado %in% 4~"Simbolismo (representa algo malo o gatilla malos recuerdos)",
     Desagrado %in% 5~"No hay nada que le desagrade"))
-  
+###########################################################
+    
   DF <- DF %>% mutate(Ocu_agrupado= case_when(
     Ocupacion %in% c("ASEO", "CUIDADOR AUTOS", "ESTACIONAMIENTO CENTRO CONERCIAL", "GUARDIA DE SEGURIDAD",
                      "INSTRUCTOR NAUTICO", "INSTRUCTORA BUCEO", "MANIOBRAS NAUTICAS", "MUCAMA", "OPERADOR",
@@ -77,6 +80,9 @@
     Relacion_mar %in% c("RECOGER CONCHITAS Y CAMINAR", "TRABAJO")~"MATERIAL- Materiales y asistencia",
     Relacion_mar %in% c("ACT NAUTICAS VELA SUP URF", "BUCEO", "NAVEGACION", "VER EL MAR", "TRABAJO Y DEPORTE")~"NO MATERIAL- Aprendizaje e inspiración"))
   
+  
+  
+  saveRDS(DF, "DF_socio.rds")
   
   #
   
