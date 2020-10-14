@@ -13,9 +13,5 @@ Distintos graficos exploratorios:
   - **Preliminar por especie.R**
 
 Se incluye el primer intento de analisis de vías:
-**PLS\_PathAnalysis.R**
-
-A partir de:
-
-  - **Prep datos outer model.R**
-  - **Post\_PathAnalysis.R**
+**PLS\_PathAnalysis.R** a partir de: **Prep datos outer model.R** y
+**Post\_PathAnalysis.R**

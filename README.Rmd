@@ -19,7 +19,3 @@ Distintos graficos exploratorios:
 
 Se incluye el primer intento de analisis de vías:
 **PLS_PathAnalysis.R** a partir de:  **Prep datos outer model.R** y  **Post_PathAnalysis.R**
-
-
-
-Nuevas relaciones entre ambiente y frecuencia dde visita, relaciones en **Preliminar por ambiente.R**

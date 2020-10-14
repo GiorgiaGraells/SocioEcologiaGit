@@ -39,7 +39,7 @@ saveData <- function(input) {
   # Write the file to the local system
   readr::write_rds(data,paste0("CI_temp/CI_", format(Sys.time(), "%Y_%m_%d_%H_%M_%S"), ".rds"))
 }
-
+  
 loadData <- function() {
   # read all the files into a list
   files <- list.files(outputDir, full.names = TRUE)

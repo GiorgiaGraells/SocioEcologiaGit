@@ -91,7 +91,7 @@
 
 ggplot(DF2, aes(x = fct_reorder(AmbOrigen,n, .desc=TRUE), y = n, group = Sitio)) + geom_col(aes(fill=AmbOrigen), position="dodge", color="black") + 
   geom_text(aes(label = Sitio), size=3.5, position=position_dodge(0.9), angle=90,vjust=0.5, hjust=-0.04 ) + 
-  labs(y="Número de encuestas", x="Sitios")  + theme_classic()+ ylim(c(0,33))+theme(legend.position = "none")+ 
+  labs(y="Número de encuestas", x="Sitios")  + theme_classic()+ ylim(c(0,17))+theme(legend.position = "none")+ 
   scale_fill_brewer(palette = "Dark2") + theme(text=element_text(size=18,  family="Arial"))
 
 ####

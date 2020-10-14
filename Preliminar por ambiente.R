@@ -122,7 +122,8 @@ saveRDS(Avance, "DatosAvance.rds")
 #####################
 #correr desde aca
 
-Avance <- readRDS("DatosAvance.rds") %>%  mutate(Ambiente_encuesta= case_when(
+Avance <- readRDS("DatosAvance.rds")  %>%dplyr::filter(!is.na(Ambiente_bienestar))%>%
+  mutate(Ambiente_encuesta= case_when(
   Sitio %in% c("CASA", "LAS SIRENAS", "PARQUE EL LITRE", "PLAZA RECREO", "PLAZA GABRIELA MISTRAL")~"VERDE",
   Sitio %in% c("LAGHU YOGA", "RENACA CENTRO")~"URBANO",
   Sitio %in% c("LAGUNA VERDE", "PLAYA NEGRA", "HUMEDAL RENACA", "LAS SALINAS")~"PLAYA NATURAL",
@@ -135,12 +136,22 @@ Avance <- readRDS("DatosAvance.rds") %>%  mutate(Ambiente_encuesta= case_when(
 Avance <- Avance %>% mutate(Ambiente=fct_relevel(Ambiente, "Urbano", "Verde", "RocaInt", "PlayaInt", "PlayaNat"))
 ggplot(Avance, aes(x=Ambiente, y=Ambiente_bienestar)) + geom_violin() +geom_jitter(aes(color=Ambiente))+theme_classic()+
   xlab("Ambientes")+ ylab("Bienestar al ver aves")
+# if the notches of two boxes do not overlap, this suggests that the medians are significantly different.
+ggplot(Avance, aes(x=Ambiente, y=Ambiente_bienestar)) + geom_boxplot(notch=TRUE) +theme_classic()+
+  xlab("Ambientes")+ ylab("Bienestar al ver aves") 
 
 #considerando el ambiente donde se realizó la encuesta
 
-Avance <- Avance %>% mutate(Ambiente_encuesta=fct_relevel(Ambiente_encuesta, "URBANO", "VERDE", "PLAYA INTERVENIDA", "PLAYA NATURAL"))
+Avance <- Avance %>% mutate(Ambiente_encuesta=fct_relevel(Ambiente_encuesta, "URBANO","PLAYA INTERVENIDA","ROCA INTERVENIDA","VERDE", "PLAYA NATURAL"))
 ggplot(Avance, aes(x=Ambiente, y=Ambiente_bienestar)) + geom_violin() +geom_jitter(aes(color=Ambiente_encuesta))+theme_classic()+
   xlab("Ambiente preguntado")+ ylab("Bienestar al ver aves")+ facet_wrap(~Ambiente_encuesta)+theme(axis.text.x = element_text(angle=45, vjust= 1, hjust=1))
+
+ggplot(Avance, aes(x=Ambiente, y=Ambiente_bienestar)) + geom_boxplot() +theme_classic()+
+  xlab("Ambiente preguntado")+ ylab("Bienestar al ver aves")+ facet_wrap(~Ambiente_encuesta)+theme(axis.text.x = element_text(angle=45, vjust= 1, hjust=1))
+
+ggplot(Avance, aes(x=Ambiente_encuesta, y=Ambiente_bienestar)) + geom_boxplot(aes(color=Ambiente_encuesta)) + theme_classic()+
+  xlab("Ambiente donde se realiza la encuesta")+ ylab("Bienestar al ver aves")+ facet_wrap(~Ambiente)+theme(axis.text.x = element_text(angle=45, vjust= 1, hjust=1))
+
 
 ##################
 
