@@ -210,7 +210,10 @@ ggplot(Avance, aes(x=Relacion_MarNCP, y=Ambiente_bienestar))+ geom_violin() +geo
 
 ggplot(Avance, aes(x=Ambiente, y=Ambiente_bienestar)) + geom_violin() +geom_jitter(aes(color=Relacion_MarNCP))+
   theme_classic()+ xlab("Ambientes")+ ylab("Bienestar al ver aves")+theme(axis.text.x = element_text(angle=60, vjust= 1, hjust=1))
-
+Avance <- Avance %>% mutate(Relacion_MarNCP=fct_relevel(Relacion_MarNCP, "MATERIAL- Materiales y asistencia","MATERIAL- Alimentación", "REGULACIÓN- Reg. cal. aire",
+                                                        "NO MATERIAL- Exp. fís. y psic.", "NO MATERIAL- Sop. identidad","NO MATERIAL- Aprendizaje e insp."))
+ggplot(Avance, aes(x=Ambiente, y=Ambiente_bienestar)) + geom_boxplot()+facet_wrap(~Relacion_MarNCP)+
+  theme_classic()+ xlab("Ambientes")+ ylab("Bienestar al ver aves")+theme(axis.text.x = element_text(angle=60, vjust= 1, hjust=1))
 
 
 

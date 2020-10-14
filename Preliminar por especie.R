@@ -139,17 +139,25 @@ Avance2 <- Avance2 %>% mutate(Origen= case_when( Origen== 1 ~ "Terrestre",
 Avance2 <- Avance2 %>% mutate(Conoce_especie= ifelse(Conoce_especie==2 , 0, 1))
 
 
-write_csv(Avance2, "DatosAvance2.csv")
+saveRDS(Avance2, "DatosAvance2.rds")
 
-Avance2 <- Avance2 %>% mutate(Ambiente=fct_relevel(Ambiente, "Urbano", "Verde", "RocaInt", "PlayaInt", "PlayaNat"))
-Avance2 <- Avance2 %>% mutate(Especie=fct_relevel(Especie, "Columba", "Zonotrichia", "Turdus", "Larus", "Phalacrocorax"))
+
 
 ##############
+Avance2 <- read_rds("DatosAvance2.rds") %>% mutate(Ambiente=fct_relevel(Ambiente, "Urbano", "Verde", "RocaInt", "PlayaInt", "PlayaNat"))
+Avance2 <- Avance2 %>% mutate(Especie=fct_relevel(Especie, "Columba", "Zonotrichia", "Turdus", "Larus", "Phalacrocorax"))
+
 #general 600x400
 
 
 ggplot(Avance2, aes(x=Ambiente, y=Beneficio_sp_amb)) + geom_violin() +geom_jitter(aes(color=Especie))+theme_classic()+
   xlab("Ambientes")+ ylab("Bienestar al ver aves")
+ggplot(Avance2, aes(x=Ambiente, y=Beneficio_sp_amb)) + geom_boxplot(notch=T) + facet_wrap(~Especie)+theme_classic()+
+  xlab("Ambientes")+ ylab("Bienestar especies-ambiente")
+
+ggplot(Avance2, aes(x=Especie, y=Beneficio_sp_amb)) + geom_boxplot(notch=T) + facet_wrap(~Ambiente)+theme_classic()+
+  xlab("Ambientes")+ ylab("Bienestar especies-ambiente")
+#
 
 ggplot(Avance2, aes(x=FrecPercibida, y=Beneficio_sp_amb))+ geom_smooth(method=lm, se=FALSE,aes(color=Especie))+
   geom_point(aes(color=Especie)) +  xlab("Frecuencia percibida por especie")+ylab("Beneficio percibido por especie") +theme_classic()
