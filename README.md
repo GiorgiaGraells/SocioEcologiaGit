@@ -15,3 +15,6 @@ Distintos graficos exploratorios:
 Se incluye el primer intento de analisis de vías:
 **PLS\_PathAnalysis.R** a partir de: **Prep datos outer model.R** y
 **Post\_PathAnalysis.R**
+
+Analisis preliminares utulizando ordered logisstic regression, para
+presentar como alternativa de 55 réplicas **RegLog.Rmd**

@@ -106,7 +106,9 @@ Avance <- Avance %>% mutate(AgradoCH= case_when(
   Agrado %in% 2~"Comportamiento",
   Agrado %in% 3~"Familiaridad",
   Agrado %in% 4~"Simbolismo",
-  Agrado %in% 5~"Nada le agrada"))
+  Agrado %in% 5~"Nada le agrada",
+  Agrado %in% 6~"Otro"
+  ))
 
 Avance <- Avance %>% mutate(DesagradoCH= case_when(
   Desagrado %in% 1~"Estética",

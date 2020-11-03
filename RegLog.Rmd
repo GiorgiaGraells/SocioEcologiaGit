@@ -1,0 +1,78 @@
+---
+title: "Untitled"
+author: "Giorgia Graells"
+date: "11/3/2020"
+output:
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE, error=F)
+library(tidyverse)
+library(ggplot2)
+library(MASS)
+library(MuMIn)
+library(caret)
+library(equatiomatic)
+library(kableExtra)
+```
+
+
+
+```{r}
+PorAmb <- readRDS("DatosAvance.rds")  %>%dplyr::filter(!is.na(Ambiente_bienestar))%>%
+  mutate(Ambiente_encuesta= case_when(
+    Sitio %in% c("CASA", "LAS SIRENAS", "PARQUE EL LITRE", "PLAZA RECREO", "PLAZA GABRIELA MISTRAL")~"VERDE",
+    Sitio %in% c("LAGHU YOGA", "RENACA CENTRO")~"URBANO",
+    Sitio %in% c("LAGUNA VERDE", "PLAYA NEGRA", "HUMEDAL RENACA", "LAS SALINAS")~"PLAYA NATURAL",
+    Sitio %in% c("PLAYA AMARILLA", "SECTOR 5", "LOS LILENES")~"PLAYA INTERVENIDA",
+    Sitio %in% c("ROCA OCEANICA")~"ROCA NATURAL",
+    Sitio %in% c("CLUB YATES", "MUELLE BARON")~"ROCA INTERVENIDA")) %>% 
+  mutate(Ambiente=fct_relevel(Ambiente, "Urbano", "Verde", "RocaInt", "PlayaInt", "PlayaNat"))
+
+```
+
+
+Transformo variable categorica en dummy variable y armo el modelo con cada una de las variables creadas
+
+```{r}
+
+#la variable respuesta posee un orden, por eso utilizo este analisis
+PorAmb$Ambiente_bienestar <- factor(x= as.character(PorAmb$Ambiente_bienestar), ordered= T)
+
+#generacion de dummy variables para la variable "que te agrada de las aves?"
+ParaDummies <- dummyVars(~ AgradoCH , data = PorAmb)
+VarDum <- predict(ParaDummies, PorAmb) %>% as.data.frame()
+PorAmb <- bind_cols(PorAmb, VarDum)
+
+```
+
+
+El modelo es generado a partir de todas las variables que pueden explicar la nota de bienestar por ambiente. La seleccion de modelos (dredge) se limita a partir de el numero de observaciones de la base de datos 
+```{r}
+# Modelo general
+Amb.plr <- polr(Ambiente_bienestar ~ Relacion_MarNCP + Distancia_residenciaKm + Nota_conocimiento+ AmbOrigen+ Ambiente + AgradoCHComportamiento + AgradoCHEstética  + AgradoCHFamiliaridad + `AgradoCHNada le agrada` + AgradoCHSimbolismo , data = PorAmb)
+
+options(na.action = "na.fail")
+
+Selected <- dredge(Amb.plr, m.lim = c(0, floor(nrow(PorAmb)/10)))
+
+
+```
+
+
+```{r}
+Final <- subset(Selected, delta < 2)
+
+Final_Df <- as.data.frame(Final)
+Final_Df <- Final_Df[,colSums(is.na(Final_Df))!=nrow(Final_Df)]
+
+kable(Final_Df, digits = 2, booktabs=T) %>%  kable_styling(latex_options = c("scale_down"), font_size = 9)
+```
+
+ahora promediar...
+
+```{r, results='asis'}
+#extract_eq(Amb.plr, use_coefs = T, terms_per_line = 4)
+```
+
