@@ -17,6 +17,10 @@ Distintos graficos exploratorios:
 - **Preliminar por ambiente.R**
 - **Preliminar por especie.R**
 
+Se incluye gráficos de boxplot para mejor representacion de los datos con 95% IC. Para esto se trabaja con la variable **AmbOrigen**, donde se hace la encuesta, y **Ambiente** que es el ambiente por el cual se pregunta
+
+### Análisis
+
 Se incluye el primer intento de analisis de vías:
 **PLS_PathAnalysis.R** a partir de:  **Prep datos outer model.R** y  **Post_PathAnalysis.R**
 
