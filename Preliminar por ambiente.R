@@ -120,11 +120,11 @@ Avance <- Avance %>% mutate(DesagradoCH= case_when(
 
 saveRDS(Avance, "DatosAvance.rds")
 
-
-#####################
+#############################################################
+#############################################################
 #correr desde aca
 
-Avance <- readRDS("DatosAvance.rds")  %>%dplyr::filter(!is.na(Ambiente_bienestar))%>%
+Avance <- readRDS("DatosAvance.rds")  %>%dplyr::filter(!is.na(Ambiente_bienestar)) #%>%
   mutate(Ambiente_encuesta= case_when(
   Sitio %in% c("CASA", "LAS SIRENAS", "PARQUE EL LITRE", "PLAZA RECREO", "PLAZA GABRIELA MISTRAL")~"VERDE",
   Sitio %in% c("LAGHU YOGA", "RENACA CENTRO")~"URBANO",
@@ -138,20 +138,25 @@ Avance <- readRDS("DatosAvance.rds")  %>%dplyr::filter(!is.na(Ambiente_bienestar
 Avance <- Avance %>% mutate(Ambiente=fct_relevel(Ambiente, "Urbano", "Verde", "RocaInt", "PlayaInt", "PlayaNat"))
 ggplot(Avance, aes(x=Ambiente, y=Ambiente_bienestar)) + geom_violin() +geom_jitter(aes(color=Ambiente))+theme_classic()+
   xlab("Ambientes")+ ylab("Bienestar al ver aves")
+
+#figuras con boxplot y 95%IC
 # if the notches of two boxes do not overlap, this suggests that the medians are significantly different.
 ggplot(Avance, aes(x=Ambiente, y=Ambiente_bienestar)) + geom_boxplot(notch=TRUE) +theme_classic()+
   xlab("Ambientes")+ ylab("Bienestar al ver aves") 
 
 #considerando el ambiente donde se realizó la encuesta
 
-Avance <- Avance %>% mutate(Ambiente_encuesta=fct_relevel(Ambiente_encuesta, "URBANO","PLAYA INTERVENIDA","ROCA INTERVENIDA","VERDE", "PLAYA NATURAL"))
-ggplot(Avance, aes(x=Ambiente, y=Ambiente_bienestar)) + geom_violin() +geom_jitter(aes(color=Ambiente_encuesta))+theme_classic()+
-  xlab("Ambiente preguntado")+ ylab("Bienestar al ver aves")+ facet_wrap(~Ambiente_encuesta)+theme(axis.text.x = element_text(angle=45, vjust= 1, hjust=1))
+Avance <- Avance %>% mutate(AmbOrigenta=fct_relevel(Ambiente_encuesta, "URBANO","PLAYA INTERVENIDA","ROCA INTERVENIDA","VERDE", "PLAYA NATURAL")) %>% 
+  mutate(AmbOrigen=fct_relevel(AmbOrigenta, "URBANO","PLAYA INTERVENIDA","ROCA INTERVENIDA","VERDE", "PLAYA NATURAL"))
+
+ggplot(Avance, aes(x=Ambiente, y=Ambiente_bienestar)) + geom_violin() +geom_jitter(aes(color=AmbOrigen))+theme_classic()+
+  xlab("Ambiente preguntado")+ ylab("Bienestar al ver aves")+ facet_wrap(~AmbOrigen)+theme(axis.text.x = element_text(angle=45, vjust= 1, hjust=1))
 
 ggplot(Avance, aes(x=Ambiente, y=Ambiente_bienestar)) + geom_boxplot() +theme_classic()+
-  xlab("Ambiente preguntado")+ ylab("Bienestar al ver aves")+ facet_wrap(~Ambiente_encuesta)+theme(axis.text.x = element_text(angle=45, vjust= 1, hjust=1))
+  xlab("Ambiente preguntado")+ ylab("Bienestar al ver aves")+ facet_wrap(~AmbOrigen)+theme(axis.text.x = element_text(angle=45, vjust= 1, hjust=1))
 
-ggplot(Avance, aes(x=Ambiente_encuesta, y=Ambiente_bienestar)) + geom_boxplot(aes(color=Ambiente_encuesta)) + theme_classic()+
+
+ggplot(Avance, aes(x=AmbOrigen, y=Ambiente_bienestar)) + geom_boxplot(aes(color=AmbOrigen)) + theme_classic()+
   xlab("Ambiente donde se realiza la encuesta")+ ylab("Bienestar al ver aves")+ facet_wrap(~Ambiente)+theme(axis.text.x = element_text(angle=45, vjust= 1, hjust=1))
 
 
@@ -167,11 +172,11 @@ ggplot(Avance, aes(x=Frec_visita, y=Ambiente_bienestar))+ geom_smooth(method=lm,
 
 #considerando donde se realizo la encuesta
 ggplot(Avance, aes(x=Frec_visita, y=Ambiente_bienestar))+ geom_smooth(method=lm, se=FALSE,aes(color=Ambiente)) +
-  geom_point(aes(color=Ambiente))+ xlab("Frecuencia de visita") +ylab("Bienestar al ver aves")+ facet_wrap(~Ambiente_encuesta)+
+  geom_point(aes(color=Ambiente))+ xlab("Frecuencia de visita") +ylab("Bienestar al ver aves")+ facet_wrap(~AmbOrigen)+
   theme_classic()
 
 #Bienestar vs frecuencia de visita , considerando donde se realizo la encuesta
-ggplot(Avance, aes(x=Ambiente_encuesta, y=Frec_visita))+  geom_violin() +geom_jitter(aes(color=Ambiente))+
+ggplot(Avance, aes(x=AmbOrigenta, y=Frec_visita))+  geom_violin() +geom_jitter(aes(color=Ambiente))+
  xlab("Ambientes") +ylab("Frecuencia de visita")+ facet_wrap(~Ambiente_bienestar)+
   theme_classic()+theme(axis.text.x = element_text(angle=45, vjust= 1, hjust=1))
 
@@ -179,12 +184,12 @@ ggplot(Avance, aes(x=Ambiente, y=Ambiente_bienestar)) + geom_violin() +geom_jitt
   xlab("Ambiente")+ ylab("Bienestar al ver aves")+ facet_wrap(~Frec_visita,4)+theme(axis.text.x = element_text(angle=45, vjust= 1, hjust=1))
 
 #considerando amb preuntado y donde se realizó la encuesta
-ggplot(Avance, aes(x=Ambiente, y=Ambiente_bienestar)) + geom_violin() +geom_jitter(aes(color=Ambiente_encuesta))+theme_classic()+
+ggplot(Avance, aes(x=Ambiente, y=Ambiente_bienestar)) + geom_violin() +geom_jitter(aes(color=AmbOrigenta))+theme_classic()+
   xlab("Ambiente")+ ylab("Bienestar al ver aves")+ facet_wrap(~Frec_visita,4)+theme(axis.text.x = element_text(angle=45, vjust= 1, hjust=1))
 
 #considerando amb preuntado y donde se realizó la encuesta
 ggplot(Avance, aes(x=Ambiente, y=Ambiente_bienestar)) + geom_violin() +geom_jitter(aes(color=Frec_visita))+theme_classic()+
-  xlab("Ambiente")+ ylab("Bienestar al ver aves")+ facet_wrap(~Ambiente_encuesta)+theme(axis.text.x = element_text(angle=45, vjust= 1, hjust=1))
+  xlab("Ambiente")+ ylab("Bienestar al ver aves")+ facet_wrap(~AmbOrigenta)+theme(axis.text.x = element_text(angle=45, vjust= 1, hjust=1))
 
 
 
