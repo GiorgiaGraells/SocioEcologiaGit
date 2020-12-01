@@ -1,7 +1,6 @@
 #Valoración por especie preliminar
 
 library(tidyverse)
-library(ggplot2)
 
 Val <- read_csv("/home/giorgia/Documents/Doctorado tesis/Encuesta/EncuestaAvesRegistro/respuestas_COMPLETO.csv") %>%  select(-contains("_otro")) 
 Val <- Val %>% mutate_if(is.character, str_to_upper)
