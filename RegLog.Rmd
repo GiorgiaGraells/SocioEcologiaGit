@@ -21,7 +21,7 @@ require(Hmisc)
 require(reshape2)
 ```
 
-### Bienestar por ambiente
+# Bienestar por ambiente
 
 ```{r}
 PorAmb <- readRDS("DatosAvance.rds")  %>%dplyr::filter(!is.na(Ambiente_bienestar))%>%
@@ -111,12 +111,14 @@ exp(cbind(OR = coef(BestModel), ci))
 
 
 
-### Bienestar por especie
+# Bienestar por especie
 
 ```{r}
-PorSp <-read_rds("DatosAvance2.rds") %>%dplyr::filter(!is.na(Beneficio_sp_amb))%>% 
+PorSp <-read_rds("DatosAvance2.rds") %>%dplyr::filter(across(everything(), ~ !is.na(.x))) %>% 
   mutate(Ambiente=fct_relevel(Ambiente, "Urbano", "Verde", "RocaInt", "PlayaInt", "PlayaNat"))
 PorSp <- PorSp%>% mutate(Especie=fct_relevel(Especie, "Columba", "Zonotrichia", "Turdus", "Larus", "Phalacrocorax"))
+#sacar NA de todas las columnas
+#Por
 
 ```
 
@@ -133,14 +135,16 @@ Transformo variable categorica en dummy variable y armo el modelo con cada una d
 
 ```{r}
 #generacion de dummy variables para la variable "que te agrada de las aves?"
-ParaDummies <- dummyVars(~ AgradoCH  , data = PorAmb)
-VarDum <- predict(ParaDummies, PorAmb) %>% as.data.frame()
-PorAmb <- bind_cols(PorAmb, VarDum)
+ParaDummies <- dummyVars(~ AgradoCH  , data = PorSp)
+VarDum <- predict(ParaDummies, PorSp) %>% as.data.frame()
+PorSp <- bind_cols(PorSp, VarDum)
+
+
 
 ```
 
 
-sacar NA de todas las calumnas
+
 ```{r}
 # Modelo general
 Sp.plr <- polr(Beneficio_sp_amb ~ Relacion_MarNCP + Distancia_residenciaKm + Nota_conocimiento+  Ambiente* Especie + FrecPercibida + Conoce_especie + Conoce_nombre + Conoce_origen, data = PorSp)
