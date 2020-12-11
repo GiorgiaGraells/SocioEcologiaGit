@@ -7,7 +7,7 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE, error=F)
+knitr::opts_chunk$set(echo = FALSE, warning=FALSE, message=FALSE, error=F)
 library(tidyverse)
 library(ggplot2)
 library(MASS)
@@ -43,30 +43,30 @@ PorAmb$Ambiente_bienestar <- factor(x= as.character(PorAmb$Ambiente_bienestar), 
 ```
 
 
-Transformo variable categorica en dummy variable y armo el modelo con cada una de las variables creadas
 
 ```{r}
 #generacion de dummy variables para la variable "que te agrada de las aves?"
-ParaDummies <- dummyVars(~ Relacion_MarNCP  , data = PorAmb)
-VarDum <- predict(ParaDummies, PorAmb) %>% as.data.frame()
-PorAmb <- bind_cols(PorAmb, VarDum)
+#ParaDummies <- dummyVars(~ AgradoCH  , data = PorAmb)
+#VarDum <- predict(ParaDummies, PorAmb) %>% as.data.frame()
+#PorAmb <- bind_cols(PorAmb, VarDum)
 
 ```
 
 
+El modelo se arma con la variable explicativa y todas las variables que pueden explicar la nota de bienestar por ambiente. La seleccion de modelos (dredge) se limita a partir de el numero de observaciones de la base de datos.
 
-
-El modelo es generado a partir de todas las variables que pueden explicar la nota de bienestar por ambiente. La seleccion de modelos (dredge) se limita a partir de el numero de observaciones de la base de datos 
-```{r}
+```{r, cache=TRUE}
 # Modelo general
+#Ambiente es ambiente por el que se pregunta, AmbOrigen es donde se hace la encuesta
+
 Amb.plr <- polr(Ambiente_bienestar ~ Relacion_MarNCP + Distancia_residenciaKm + Nota_conocimiento+ AmbOrigen+ Ambiente + AgradoCH , data = PorAmb)
-options(na.action = "na.fail")
+options(na.action = "na.fail")       
 Selected <- dredge(Amb.plr, m.lim = c(0, floor(nrow(PorAmb)/10)))
 
 ```
 
 
-Mejores modelos
+Los mejores modelos son aquellos con el menor AIC, se seleccionan los modelos con delta menor o igual a 2, que son los que poseen mayor peso.
 
 
 
@@ -81,31 +81,28 @@ Final_DF <- as.data.frame(Final)
 kable(Final_DF, digits = 2, booktabs=T) %>%  kable_styling(latex_options = c("scale_down"), font_size = 9)
 ```
 
-Selecciono mejor modelo
+Se promedian los modelos seleccionados
 
 ```{r, results='asis'}
 
-BestModel <- get.models(Selected, subset = 1)[[1]]
+#BestModel <- get.models(Selected, subset = 1)[[1]]
 
+Promedio <- model.avg(Final)
+Promedio$formula[3]
 
 ```
 
 
-
-
-
-
-
-
+y se obtienen los odds ratios
 
 ```{r}
-ci <- confint(BestModel)
-exp(cbind(OR = coef(BestModel), ci))
+ci <- confint(Promedio )
+Exp <- exp(cbind(OR = coef(Promedio), ci))
+
+kable(Exp, digits = 2, booktabs=T) %>%  kable_styling(latex_options = c("scale_down"), font_size = 9)
+
 ```
 
-```{r}
-
-```
 
 
 
@@ -130,24 +127,23 @@ PorSp$Beneficio_sp_amb  <- factor(x= as.character(PorSp$Beneficio_sp_amb), order
 ```
 
 
-
-Transformo variable categorica en dummy variable y armo el modelo con cada una de las variables creadas
-
 ```{r}
 #generacion de dummy variables para la variable "que te agrada de las aves?"
-ParaDummies <- dummyVars(~ AgradoCH  , data = PorSp)
-VarDum <- predict(ParaDummies, PorSp) %>% as.data.frame()
-PorSp <- bind_cols(PorSp, VarDum)
+#ParaDummies <- dummyVars(~ AgradoCH  , data = PorSp)
+#VarDum <- predict(ParaDummies, PorSp) %>% as.data.frame()
+#PorSp <- bind_cols(PorSp, VarDum)
 
 
 
 ```
 
 
+Se arma el modelo con la variable respuesta y las variables explicativas posibles. Se limita los modelos seleccionados al número de muestras.
 
-```{r}
+```{r, cache=TRUE}
 # Modelo general
-Sp.plr <- polr(Beneficio_sp_amb ~ Relacion_MarNCP + Distancia_residenciaKm + Nota_conocimiento+  Ambiente* Especie + FrecPercibida + Conoce_especie + Conoce_nombre + Conoce_origen, data = PorSp)
+Sp.plr <- polr(Beneficio_sp_amb ~ Relacion_MarNCP + Distancia_residenciaKm + Nota_conocimiento+  Ambiente* Especie + FrecPercibida + Conoce_especie + Conoce_nombre + Conoce_origen +AmbOrigen +AgradoCH, data = PorSp)
+                                  
 
 options(na.action = "na.fail")
 
@@ -156,25 +152,40 @@ SelectedSp <- dredge(Sp.plr, m.lim = c(0, floor(nrow(PorSp)/10)))
 ```
 
 
-
-
+Se seleccionan los modelos que poseen menos AIC y un delta menor o igual a 2, que son aquellos con mayor peso.
 
 
 ```{r}
-FinalSp <- subset(SelectedSp, delta < 2)
-Final_conpesoSp <- model.sel(FinalSp)
+#Selecciono solo los modelos que poseen delta <= 2 
 
-Final_DfSp <- as.data.frame(Final_conpesoSp)
+FinalSp <- subset(SelectedSp, delta <= 2)
+
+FinalSp_DF <- as.data.frame(FinalSp)
 #Final_Df <- Final_Df[,colSums(is.na(Final_Df))!=nrow(Final_Df)]
 
-kable(Final_DfSp, digits = 2, booktabs=T) %>%  kable_styling(latex_options = c("scale_down"), font_size = 9)
+kable(FinalSp_DF, digits = 2, booktabs=T) %>%  kable_styling(latex_options = c("scale_down"), font_size = 9)
 ```
 
-ahora promediar...
+Como son varios modelos con bajo peso, promedio los modelos seleccionados
 
 ```{r, results='asis'}
-#extract_eq(Amb.plr, use_coefs = T, terms_per_line = 4)
+
+PromedioSp <-model.avg(FinalSp)
+
+PromedioSp$formula[3]
 ```
+
+Obtengo los odds ratios para la interpretacion del modelo
+
+
+```{r}
+ci <- confint(PromedioSp)
+Exp <- exp(cbind(OR = coef(PromedioSp), ci))
+
+kable(Exp, digits = 2, booktabs=T) %>%  kable_styling(latex_options = c("scale_down"), font_size = 9)
+
+```
+
 
 
 
