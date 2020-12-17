@@ -141,6 +141,7 @@ ggplot(Avance, aes(x=Ambiente, y=Ambiente_bienestar)) + geom_violin() +geom_jitt
 
 #figuras con boxplot y 95%IC
 # if the notches of two boxes do not overlap, this suggests that the medians are significantly different.
+Avance <- Avance %>% mutate(Ambiente=fct_relevel(Ambiente, "Urbano", "RocaInt", "PlayaInt", "Verde","RocaNat"))
 ggplot(Avance, aes(x=Ambiente, y=Ambiente_bienestar)) + geom_boxplot(notch=TRUE) +theme_classic()+
   xlab("Ambientes")+ ylab("Bienestar al ver aves") 
 
@@ -155,9 +156,16 @@ ggplot(Avance, aes(x=Ambiente, y=Ambiente_bienestar)) + geom_violin() +geom_jitt
 ggplot(Avance, aes(x=Ambiente, y=Ambiente_bienestar)) + geom_boxplot() +theme_classic()+
   xlab("Ambiente preguntado")+ ylab("Bienestar al ver aves")+ facet_wrap(~AmbOrigen)+theme(axis.text.x = element_text(angle=45, vjust= 1, hjust=1))
 
+ 
+# el mejor grafico
 
-ggplot(Avance, aes(x=AmbOrigen, y=Ambiente_bienestar)) + geom_boxplot(aes(color=AmbOrigen)) + theme_classic()+
-  xlab("Ambiente donde se realiza la encuesta")+ ylab("Bienestar al ver aves")+ facet_wrap(~Ambiente)+theme(axis.text.x = element_text(angle=45, vjust= 1, hjust=1))
+Avance <- Avance %>%  mutate(Ambiente=fct_relevel(Ambiente, "Urbano", "RocaInt", "PlayaInt", "Verde","RocaNat")) %>% 
+  mutate(AmbOrigen=fct_relevel(AmbOrigen, "URBANO","ROCA INTERVENIDA","PLAYA INTERVENIDA","VERDE", "ROCA NATURAL"))
+ 
+ggplot(Avance, aes(x=Ambiente, y=Ambiente_bienestar)) + geom_boxplot() + theme_classic()+
+  xlab("Ambiente consultado")+ ylab("Bienestar al ver aves")+ 
+  facet_wrap(~AmbOrigen)+theme(axis.text.x = element_text(angle=45, vjust= 1, hjust=1))
+
 
 
 ##################

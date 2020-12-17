@@ -12,16 +12,16 @@ Distintos graficos exploratorios:
   - **Preliminar por ambiente.R**
   - **Preliminar por especie.R**
 
-Se incluye gráficos de boxplot para mejor representacion de los datos
-con 95% IC. Para esto se trabaja con la variable **AmbOrigen**, donde se
-hace la encuesta, y **Ambiente** que es el ambiente por el cual se
-pregunta
+En estos mismo archivos se incluyen gráficos de boxplot para mejor
+representacion de los datos con 95% IC. Para esto se trabaja con la
+variable **AmbOrigen**, donde se hace la encuesta, y **Ambiente** que es
+el ambiente por el cual se pregunta
 
 ### Análisis
 
-Se incluye el primer intento de analisis de vías:
-**PLS\_PathAnalysis.R** a partir de: **Prep datos outer model.R** y
-**Post\_PathAnalysis.R**
+Primer intento de analisis de vías: **PLS\_PathAnalysis.R** a partir de:
+**Prep datos outer model.R** y **Post\_PathAnalysis.R**
 
-Analisis preliminares utulizando ordered logisstic regression, para
-presentar como alternativa de 55 réplicas **RegLog.Rmd**
+Analisis preliminares utilizando ordered logistic regression, para
+presentar como alternativa de 55 réplicas **RegLog.Rmd**. Intento de
+analisis de poder en **Poder\_OLR.R**.

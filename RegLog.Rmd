@@ -24,17 +24,44 @@ require(reshape2)
 # Bienestar por ambiente
 
 ```{r}
-PorAmb <- readRDS("DatosAvance.rds")  %>%dplyr::filter(!is.na(Ambiente_bienestar))%>%
-  mutate(Ambiente_encuesta= case_when(
-    Sitio %in% c("CASA", "LAS SIRENAS", "PARQUE EL LITRE", "PLAZA RECREO", "PLAZA GABRIELA MISTRAL")~"VERDE",
-    Sitio %in% c("LAGHU YOGA", "RENACA CENTRO")~"URBANO",
-    Sitio %in% c("LAGUNA VERDE", "PLAYA NEGRA", "HUMEDAL RENACA", "LAS SALINAS")~"PLAYA NATURAL",
-    Sitio %in% c("PLAYA AMARILLA", "SECTOR 5", "LOS LILENES")~"PLAYA INTERVENIDA",
-    Sitio %in% c("ROCA OCEANICA")~"ROCA NATURAL",
-    Sitio %in% c("CLUB YATES", "MUELLE BARON")~"ROCA INTERVENIDA")) %>% 
-  mutate(Ambiente=fct_relevel(Ambiente, "Urbano", "Verde", "RocaInt", "PlayaInt", "PlayaNat"))
+PorAmb <- readRDS("DatosAvance.rds")  %>% dplyr::select(-Ocu_agrupado, -Encuestador, -Ingresos, -Integrantes_familia, -Ingreso_percap)  
+
+#Arreglo data frame encuestas por detalles encontrados en dic2020
+  PorAmb <- PorAmb %>% mutate(Distancia_residenciaKm=((1/Distancia_residenciaKm)-1)) %>% 
+    mutate(DesagradoCH= case_when(
+  Desagrado %in% 1~"Estética",
+  Desagrado %in% 2~"Comportamiento",
+  Desagrado %in% 3~"Familiaridad",
+  Desagrado %in% 4~"Simbolismo",
+  Desagrado %in% 5~"Nada le desagrada",
+  Desagrado %in% 6~"Otro")) %>% 
+    mutate(AgradoCH= case_when(
+  Agrado %in% 1~"Estética",
+  Agrado %in% 2~"Comportamiento",
+  Agrado %in% 3~"Familiaridad",
+  Agrado %in% 4~"Simbolismo",
+  Agrado %in% 5~"Nada le agrada",
+  Agrado %in% 6~"Otro"))
+  
+    
+  
+#Filtrado por falta de datos y orden
+ # PorAmb <- PorAmb %>%  dplyr::filter(!is.na(Ambiente_bienestar)) %>%
+  #mutate(Ambiente=fct_relevel(Ambiente, "Urbano", "Verde", "RocaInt", "PlayaInt", "PlayaNat"))
 
 ```
+
+
+```{r Encuestados}
+#caracterizacion encuestados
+
+Resumen_Encuestados <- PorAmb %>% dplyr::select(Edad, Distancia_residenciaKm, Nota_conocimiento, Participacion_avistamiento, Ambiente_bienestar)
+Res <- summary(Resumen_Encuestados)
+
+kable(Res, digits = 2, booktabs=T) %>%  kable_styling(latex_options = c("scale_down"), font_size = 11)
+
+```
+
 
 
 ```{r}
@@ -59,9 +86,31 @@ El modelo se arma con la variable explicativa y todas las variables que pueden e
 # Modelo general
 #Ambiente es ambiente por el que se pregunta, AmbOrigen es donde se hace la encuesta
 
-Amb.plr <- polr(Ambiente_bienestar ~ Relacion_MarNCP + Distancia_residenciaKm + Nota_conocimiento+ AmbOrigen+ Ambiente + AgradoCH , data = PorAmb)
+Amb.plr <- polr(Ambiente_bienestar ~ Relacion_MarNCP + Distancia_residenciaKm+  Nota_conocimiento+ AmbOrigen+ Ambiente + AgradoCH , data = PorAmb, Hess=TRUE)
+
 options(na.action = "na.fail")       
 Selected <- dredge(Amb.plr, m.lim = c(0, floor(nrow(PorAmb)/10)))
+
+```
+
+
+
+
+```{r}
+#Para var el valor de p del modelo en casode tener muestras grandes
+#store table
+ctable <- coef(summary(Amb.plr))
+
+## calculate and store p values
+p <- pnorm(abs(ctable[, "t value"]), lower.tail = FALSE) * 2
+
+## combined table
+ctable <- cbind(ctable, "p value" = p)
+ctable <- as.data.frame(ctable)
+ctable2 <- ctable %>% dplyr::filter(`p value` <= 0.05)
+
+kable(ctable2, digits = 2, booktabs=T) %>%  kable_styling(latex_options = c("scale_down"), font_size = 11)
+
 
 ```
 
@@ -88,7 +137,7 @@ Se promedian los modelos seleccionados
 #BestModel <- get.models(Selected, subset = 1)[[1]]
 
 Promedio <- model.avg(Final)
-Promedio$formula[3]
+
 
 ```
 
@@ -111,11 +160,35 @@ kable(Exp, digits = 2, booktabs=T) %>%  kable_styling(latex_options = c("scale_d
 # Bienestar por especie
 
 ```{r}
-PorSp <-read_rds("DatosAvance2.rds") %>%dplyr::filter(across(everything(), ~ !is.na(.x))) %>% 
-  mutate(Ambiente=fct_relevel(Ambiente, "Urbano", "Verde", "RocaInt", "PlayaInt", "PlayaNat"))
-PorSp <- PorSp%>% mutate(Especie=fct_relevel(Especie, "Columba", "Zonotrichia", "Turdus", "Larus", "Phalacrocorax"))
+PorSp <-read_rds("DatosAvance2.rds") %>% dplyr::select(-Ocu_agrupado, -Encuestador, -Ingresos, -Integrantes_familia, -Ingreso_percap)  
+
+#Arreglo data frame encuestas por detalles encontrados en dic2020
+
+PorSp <- PorSp %>% mutate(Distancia_residenciaKm=((1/Distancia_residenciaKm)-1)) %>% 
+    mutate(DesagradoCH= case_when(
+  Desagrado %in% 1~"Estética",
+  Desagrado %in% 2~"Comportamiento",
+  Desagrado %in% 3~"Familiaridad",
+  Desagrado %in% 4~"Simbolismo",
+  Desagrado %in% 5~"Nada le desagrada",
+  Desagrado %in% 6~"Otro")) %>% 
+    mutate(AgradoCH= case_when(
+  Agrado %in% 1~"Estética",
+  Agrado %in% 2~"Comportamiento",
+  Agrado %in% 3~"Familiaridad",
+  Agrado %in% 4~"Simbolismo",
+  Agrado %in% 5~"Nada le agrada",
+  Agrado %in% 6~"Otro")) %>% 
+  mutate(Beneficio_sp_amb = ifelse(Beneficio_sp_amb == 0, NA, Beneficio_sp_amb)) %>% 
+  dplyr::filter(across(everything(), ~ !is.na(.x)))
+
+
+
+# %>% 
+#  mutate(Ambiente=fct_relevel(Ambiente, "Urbano", "Verde", "RocaInt", "PlayaInt", "PlayaNat"))
+#PorSp <- PorSp%>% mutate(Especie=fct_relevel(Especie, "Columba", "Zonotrichia", "Turdus", "Larus", "Phalacrocorax"))
 #sacar NA de todas las columnas
-#Por
+
 
 ```
 
@@ -142,7 +215,7 @@ Se arma el modelo con la variable respuesta y las variables explicativas posible
 
 ```{r, cache=TRUE}
 # Modelo general
-Sp.plr <- polr(Beneficio_sp_amb ~ Relacion_MarNCP + Distancia_residenciaKm + Nota_conocimiento+  Ambiente* Especie + FrecPercibida + Conoce_especie + Conoce_nombre + Conoce_origen +AmbOrigen +AgradoCH, data = PorSp)
+Sp.plr <- polr(Beneficio_sp_amb ~   Ambiente* Especie + FrecPercibida + Conoce_especie + Conoce_nombre + Conoce_origen +AmbOrigen , data = PorSp, Hess=TRUE)
                                   
 
 options(na.action = "na.fail")
@@ -172,7 +245,7 @@ Como son varios modelos con bajo peso, promedio los modelos seleccionados
 
 PromedioSp <-model.avg(FinalSp)
 
-PromedioSp$formula[3]
+
 ```
 
 Obtengo los odds ratios para la interpretacion del modelo
@@ -182,7 +255,7 @@ Obtengo los odds ratios para la interpretacion del modelo
 ci <- confint(PromedioSp)
 Exp <- exp(cbind(OR = coef(PromedioSp), ci))
 
-kable(Exp, digits = 2, booktabs=T) %>%  kable_styling(latex_options = c("scale_down"), font_size = 9)
+kable(Exp, digits = 2, booktabs=T) %>%  kable_styling(latex_options = c("scale_down"), font_size = 8)
 
 ```
 
