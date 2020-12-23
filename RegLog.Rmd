@@ -33,15 +33,15 @@ PorAmb <- readRDS("DatosAvance.rds")  %>% dplyr::select(-Ocu_agrupado, -Encuesta
   Desagrado %in% 2~"Comportamiento",
   Desagrado %in% 3~"Familiaridad",
   Desagrado %in% 4~"Simbolismo",
-  Desagrado %in% 5~"Nada le desagrada",
-  Desagrado %in% 6~"Otro")) %>% 
+  Desagrado %in% 5~"Nada le desagrada"#,   Desagrado %in% 6~"Otro"
+  )) %>% 
     mutate(AgradoCH= case_when(
   Agrado %in% 1~"Estética",
   Agrado %in% 2~"Comportamiento",
   Agrado %in% 3~"Familiaridad",
   Agrado %in% 4~"Simbolismo",
-  Agrado %in% 5~"Nada le agrada",
-  Agrado %in% 6~"Otro"))
+  Agrado %in% 5~"Nada le agrada"#,   Agrado %in% 6~"Otro"
+  ))
   
     
   
@@ -89,7 +89,7 @@ El modelo se arma con la variable explicativa y todas las variables que pueden e
 Amb.plr <- polr(Ambiente_bienestar ~ Relacion_MarNCP + Distancia_residenciaKm+  Nota_conocimiento+ AmbOrigen+ Ambiente + AgradoCH , data = PorAmb, Hess=TRUE)
 
 options(na.action = "na.fail")       
-Selected <- dredge(Amb.plr, m.lim = c(0, floor(nrow(PorAmb)/10)))
+Selected <- dredge(Amb.plr, m.lim = c(0, floor(nrow(PorAmb)/60)))
 
 ```
 
@@ -134,10 +134,11 @@ Se promedian los modelos seleccionados
 
 ```{r, results='asis'}
 
-#BestModel <- get.models(Selected, subset = 1)[[1]]
+BestModel <- get.models(Selected, subset = 1)[[1]]
 
-Promedio <- model.avg(Final)
+Promedio <- model.avg(Final, fit = T)
 
+kable(Promedio$coefficients, digits = 2, booktabs=T) %>%  kable_styling(latex_options = c("scale_down"), font_size = 9)
 
 ```
 
@@ -153,7 +154,63 @@ kable(Exp, digits = 2, booktabs=T) %>%  kable_styling(latex_options = c("scale_d
 ```
 
 
+```{r}
+NewDataAmb <- expand.grid(Ambiente = unique(PorAmb$Ambiente), 
+                          Distancia_residenciaKm = seq(min(PorAmb$Distancia_residenciaKm), max(PorAmb$Distancia_residenciaKm), length.out = 10), 
+                          Nota_conocimiento = seq(min(PorAmb$Nota_conocimiento), max(PorAmb$Nota_conocimiento), length.out = 10),
+                          Relacion_MarNCP = unique(PorAmb$Relacion_MarNCP),
+                          stringsAsFactors = F)
 
+
+Preds <- predict(BestModel, newdata = NewDataAmb, type = "probs") %>% as.data.frame() 
+
+NewDataAmb <- bind_cols(NewDataAmb, Preds) %>% pivot_longer(cols ="1":"7",names_to = "Beneficio", values_to = "Probabilidad")
+```
+
+
+```{r}
+NewDataAmbDistancia <- expand.grid(Ambiente = unique(PorAmb$Ambiente), 
+                          Distancia_residenciaKm = seq(min(PorAmb$Distancia_residenciaKm), max(PorAmb$Distancia_residenciaKm), length.out = 10), 
+                          Nota_conocimiento = mean(PorAmb$Nota_conocimiento),
+                          Relacion_MarNCP = unique(PorAmb$Relacion_MarNCP),
+                          stringsAsFactors = F)
+
+
+Preds <- predict(BestModel, newdata = NewDataAmbDistancia, type = "probs") %>% as.data.frame() 
+
+NewDataAmbDistancia <- bind_cols(NewDataAmbDistancia, Preds) %>% pivot_longer(cols ="1":"7",names_to = "Beneficio", values_to = "Probabilidad")
+
+
+ggplot(NewDataAmbDistancia, aes(x = Distancia_residenciaKm, y = Probabilidad, color = Beneficio)) + geom_path() + facet_grid(Ambiente~Relacion_MarNCP)
+
+NewDataAmbDistanciaSum <- NewDataAmbDistancia %>% 
+  dplyr::select(-Relacion_MarNCP) %>% 
+  group_by(Distancia_residenciaKm,Beneficio, Ambiente) %>% 
+  summarise(MaxProb = max(Probabilidad), MinProb = min(Probabilidad), Probabilidad = mean(Probabilidad))
+
+ggplot(NewDataAmbDistanciaSum, aes(x = Distancia_residenciaKm, y = Probabilidad, color = Beneficio, fill = Beneficio, group = Beneficio)) + geom_ribbon(aes(ymax = MaxProb, ymin =MinProb), alpha = 0.5) + geom_path() + facet_wrap(~Ambiente)
+```
+
+
+```{r}
+NewDataAmbDistanciaNCP <- NewDataAmbDistancia %>% 
+  dplyr::select(-Ambiente) %>% 
+  group_by(Distancia_residenciaKm,Beneficio, Relacion_MarNCP) %>% 
+  summarise(MaxProb = max(Probabilidad), MinProb = min(Probabilidad), Probabilidad = mean(Probabilidad))
+
+ggplot(NewDataAmbDistanciaNCP, aes(x = Distancia_residenciaKm, y = Probabilidad, color = Beneficio, fill = Beneficio, group = Beneficio)) + geom_ribbon(aes(ymax = MaxProb, ymin =MinProb), alpha = 0.5) + geom_path() + facet_wrap(~Relacion_MarNCP)+ theme_classic()
+```
+
+
+
+```{r ModReg,results='asis'}
+#Modelo 1= Abundancia ~ Estacion * Especie + AMBIENTE+ (1|Sitio), family = poisson, data =Aves ) #AIC 17716.1
+#Modelo 2= Abundancia ~ Especie + AMBIENTE+ (1|Sitio), family = poisson, data =Aves )           #AIC 18241.0
+#DF_seasson <- tibble(Model= c("$Estacion \\times Especie + Ambiente+ \\frac{1}{Sitio}$", "$Especie + Ambiente + \\frac{1}{Sitio}$"), AIC= c(17716.1, 18241.0))
+
+#kable(DF_seasson, booktabs=T, escape = F) %>% kable_styling(latex_options = "basic") 
+
+```
 
 
 
@@ -255,7 +312,10 @@ Obtengo los odds ratios para la interpretacion del modelo
 ci <- confint(PromedioSp)
 Exp <- exp(cbind(OR = coef(PromedioSp), ci))
 
-kable(Exp, digits = 2, booktabs=T) %>%  kable_styling(latex_options = c("scale_down"), font_size = 8)
+kable(Exp, longtable = T, digits = 2, booktabs=T, caption = "Species OddsRratios") %>%  kable_styling(latex_options = c("scale_down"), font_size = 8)
+
+
+
 
 ```
 
