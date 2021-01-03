@@ -1,0 +1,355 @@
+---
+title: "Prueba clmm de ordinal"
+author: "Giorgia Graells"
+date: "11/3/2020"
+output:
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning=FALSE, message=FALSE, error=F)
+library(tidyverse)
+library(ggplot2)
+library(MASS)
+library(MuMIn)
+library(caret)
+library(equatiomatic)
+library(kableExtra)
+library(broom)
+library(ordinal)
+```
+
+
+transformacion para obtener la probabilidad de cada clase
+luego el odd ratio evalua probabilidades de uno sobre el otro 7/6
+
+
+# Bienestar por ambiente
+
+```{r}
+PorAmb <- readRDS("DatosAvance.rds")  %>% dplyr::select(-Ocu_agrupado, -Encuestador, -Ingresos, -Integrantes_familia, -Ingreso_percap)  
+
+#Arreglo data frame encuestas por detalles encontrados en dic2020
+  PorAmb <- PorAmb %>% mutate(Distancia_residenciaKm=((1/Distancia_residenciaKm)-1)) %>% 
+    mutate(DesagradoCH= case_when(
+  Desagrado %in% 1~"Estética",
+  Desagrado %in% 2~"Comportamiento",
+  Desagrado %in% 3~"Familiaridad",
+  Desagrado %in% 4~"Simbolismo",
+  Desagrado %in% 5~"Nada le desagrada"#,   Desagrado %in% 6~"Otro"
+  )) %>% 
+    mutate(AgradoCH= case_when(
+  Agrado %in% 1~"Estética",
+  Agrado %in% 2~"Comportamiento",
+  Agrado %in% 3~"Familiaridad",
+  Agrado %in% 4~"Simbolismo",
+  Agrado %in% 5~"Nada le agrada"#,   Agrado %in% 6~"Otro"
+  ))
+  
+    
+  
+#Filtrado por falta de datos y orden
+ # PorAmb <- PorAmb %>%  dplyr::filter(!is.na(Ambiente_bienestar)) %>%
+  #mutate(Ambiente=fct_relevel(Ambiente, "Urbano", "Verde", "RocaInt", "PlayaInt", "PlayaNat"))
+
+```
+
+
+```{r Encuestados}
+#caracterizacion encuestados
+
+Resumen_Encuestados <- PorAmb %>% dplyr::select(Edad, Distancia_residenciaKm, Nota_conocimiento, Participacion_avistamiento, Ambiente_bienestar, ID_encuesta)
+Res <- summary(Resumen_Encuestados)
+
+kable(Res, digits = 2, booktabs=T) %>%  kable_styling(latex_options = c("scale_down"), font_size = 11)
+
+```
+
+
+
+```{r}
+#la variable respuesta posee un orden, por eso utilizo este analisis
+PorAmb$Ambiente_bienestar <- factor(x= as.character(PorAmb$Ambiente_bienestar), ordered= T)
+PorAmb$ID_encuesta <- as.factor(PorAmb$ID_encuesta)
+PorAmb <- PorAmb %>% drop_na(AgradoCH)
+```
+
+
+
+El modelo se arma con la variable explicativa y todas las variables que pueden explicar la nota de bienestar por ambiente. La seleccion de modelos (dredge) se limita a partir de el numero de observaciones de la base de datos.
+
+```{r, cache=TRUE}
+# Modelo general
+#Ambiente es ambiente por el que se pregunta, AmbOrigen es donde se hace la encuesta
+
+
+Amb.clmm <- clmm(Ambiente_bienestar ~ Relacion_MarNCP + Distancia_residenciaKm + Nota_conocimiento + AmbOrigen + Ambiente+ AgradoCH + Ambiente:AgradoCH  + (1|ID_encuesta), data = PorAmb)
+
+options(na.action = "na.fail")       
+Selected <- dredge(Amb.clmm, m.lim = c(0, floor(nrow(PorAmb)/60)))
+
+```
+
+
+Los mejores modelos son aquellos con el menor AIC, se seleccionan los modelos con delta menor o igual a 2, que son los que poseen mayor peso.
+
+
+
+```{r}
+#Selecciono solo los modelos que poseen delta <= 2 
+
+Final <- subset(Selected, delta <= 2)
+
+Final_DF <- as.data.frame(Final)
+#Final_Df <- Final_Df[,colSums(is.na(Final_Df))!=nrow(Final_Df)]
+
+kable(Final_DF, digits = 2, booktabs=T) %>%  kable_styling(latex_options = c("scale_down"), font_size = 9)
+```
+
+Se promedian los modelos seleccionados
+
+```{r, results='asis'}
+
+BestModel <- get.models(Selected, subset = 1)[[1]]
+
+Promedio <- model.avg(Final, fit = T)
+
+kable(Promedio$coefficients, digits = 2, booktabs=T) %>%  kable_styling(latex_options = c("scale_down"), font_size = 9)
+
+```
+
+
+y se obtienen los odds ratios
+
+```{r}
+ci <- confint(Promedio)
+Exp <- exp(cbind(OR = coef(Promedio), ci))
+
+kable(Exp, digits = 2, booktabs=T) %>%  kable_styling(latex_options = c("scale_down"), font_size = 9)
+
+```
+
+
+```{r}
+NewDataAmb <- expand.grid(Ambiente = unique(PorAmb$Ambiente), 
+                         Distancia_residenciaKm = seq(min(PorAmb$Distancia_residenciaKm), max(PorAmb$Distancia_residenciaKm), length.out = 10), 
+                          Nota_conocimiento = seq(min(PorAmb$Nota_conocimiento), max(PorAmb$Nota_conocimiento), length.out = 10),
+                          AgradoCH = unique(PorAmb$AgradoCH),
+                          stringsAsFactors = F)
+
+
+
+NewDataAmb <- bind_cols(NewDataAmb, Preds) %>% pivot_longer(cols ="1":"7",names_to = "Beneficio", values_to = "Probabilidad")
+```
+
+
+
+
+```{r}
+pred <- function(eta, theta, cat = 1:(length(theta) + 1), inv.link = plogis) {
+     Theta <- c(-1000, theta, 1000)
+     sapply(cat, function(j) inv.link(Theta[j + 1] - eta) - inv.link(Theta[j] - eta))}
+
+
+plot.probabilities<-function(grid, model, leg, draw.these=NULL, main="", xlab="", legend.pos="topleft", ylim=NULL, col=NULL, lty=NULL) {
+	co <- model$coefficients[1:length(model$y.levels)-1]
+	pre.mat <- pred(eta=rowSums(grid), theta=co)
+	n.total<-length(pre.mat)
+	n.rows<-length(pre.mat[1,])
+	n <- n.total/n.rows
+	ylim <- if(is.null(ylim)) c(0,1)
+	else ylim
+	draw.these <- if(is.null(draw.these)) 1:n
+	else draw.these
+
+	plot(model$y.levels, pre.mat[draw.these[1],], lty=1, type="l", ylim=ylim, xlab=xlab, axes=FALSE, ylab="Probability", las=1, main=main)
+	axis(1)
+	axis(2)
+	i <- 1
+	for(k in draw.these) {
+		draw_color <- if(is.null(col)) "black"
+		else col[i]
+		curr_lty <- if(is.null(lty)) i
+		else lty[i]
+		lines(model$y.levels, pre.mat[k,], lty=curr_lty, col=draw_color)
+		i <- i + 1 
+	}
+	if(is.null(lty)) { 
+		legend(legend.pos, leg, lty=1:i, bty="n")
+	}
+	else {
+		legend(legend.pos, leg, lty=lty, bty="n")
+	}
+}
+
+library("ordinal")
+data(wine)
+fm2 <- clmm(rating ~ temp + contact + (1|judge), data = wine,Hess = TRUE, nAGQ = 10)
+mat_no_cold <- expand.grid(judge = qnorm(0.95) * c(-1, 0, 1) * fm2$stDev, contact = c(0), temp=c(0))
+mat_yes_cold <- expand.grid(judge = qnorm(0.95) * c(-1, 0, 1) * fm2$stDev, contact = c(fm2$beta[2]), temp=c(0))
+mat_no_warm <- expand.grid(judge = qnorm(0.95) * c(-1, 0, 1) * fm2$stDev, contact = c(0), temp=c(fm2$beta[1]))
+mat_yes_warm <- expand.grid(judge = qnorm(0.95) * c(-1, 0, 1) * fm2$stDev, contact = c(fm2$beta[2]), temp=c(fm2$beta[1]))
+par(mfrow = c(2,2))
+plot.probabilities(mat_no_cold, fm2, c("5th %-tile judge","avg. judge","95th %-tile judge"), main="contact=no, temp=cold")
+plot.probabilities(mat_yes_cold, fm2, c("5th %-tile judge%","avg. judge","95th %-tile judge"), main="contact=yes, temp=cold")
+plot.probabilities(mat_no_warm, fm2, c("5th %-tile judge","avg. judge","95th %-tile judge"), main="contact=no, temp=warm")
+plot.probabilities(mat_yes_warm, fm2, c("5th %-tile judge","avg. judge","95th %-tile judge"), main="contact=yes, temp=warm")
+
+
+```
+
+
+```{r}
+NewDataAmbDistancia <- expand.grid(Ambiente = unique(PorAmb$Ambiente), 
+                          Distancia_residenciaKm = seq(min(PorAmb$Distancia_residenciaKm), max(PorAmb$Distancia_residenciaKm), length.out = 10), 
+                          Nota_conocimiento = mean(PorAmb$Nota_conocimiento),
+                          Relacion_MarNCP = unique(PorAmb$Relacion_MarNCP),
+                          stringsAsFactors = F)
+
+
+Preds <- predict(BestModel, newdata = NewDataAmbDistancia, type = "probs") %>% as.data.frame() 
+
+NewDataAmbDistancia <- bind_cols(NewDataAmbDistancia, Preds) %>% pivot_longer(cols ="1":"7",names_to = "Beneficio", values_to = "Probabilidad")
+
+
+ggplot(NewDataAmbDistancia, aes(x = Distancia_residenciaKm, y = Probabilidad, color = Beneficio)) + geom_path() + facet_grid(Ambiente~Relacion_MarNCP)
+
+NewDataAmbDistanciaSum <- NewDataAmbDistancia %>% 
+  dplyr::select(-Relacion_MarNCP) %>% 
+  group_by(Distancia_residenciaKm,Beneficio, Ambiente) %>% 
+  summarise(MaxProb = max(Probabilidad), MinProb = min(Probabilidad), Probabilidad = mean(Probabilidad))
+
+ggplot(NewDataAmbDistanciaSum, aes(x = Distancia_residenciaKm, y = Probabilidad, color = Beneficio, fill = Beneficio, group = Beneficio)) + geom_ribbon(aes(ymax = MaxProb, ymin =MinProb), alpha = 0.5) + geom_path() + facet_wrap(~Ambiente)
+```
+
+
+```{r}
+NewDataAmbDistanciaNCP <- NewDataAmbDistancia %>% 
+  dplyr::select(-Ambiente) %>% 
+  group_by(Distancia_residenciaKm,Beneficio, Relacion_MarNCP) %>% 
+  summarise(MaxProb = max(Probabilidad), MinProb = min(Probabilidad), Probabilidad = mean(Probabilidad))
+
+ggplot(NewDataAmbDistanciaNCP, aes(x = Distancia_residenciaKm, y = Probabilidad, color = Beneficio, fill = Beneficio, group = Beneficio)) + geom_ribbon(aes(ymax = MaxProb, ymin =MinProb), alpha = 0.5) + geom_path() + facet_wrap(~Relacion_MarNCP)+ theme_classic()
+```
+
+
+
+```{r ModReg,results='asis'}
+#Modelo 1= Abundancia ~ Estacion * Especie + AMBIENTE+ (1|Sitio), family = poisson, data =Aves ) #AIC 17716.1
+#Modelo 2= Abundancia ~ Especie + AMBIENTE+ (1|Sitio), family = poisson, data =Aves )           #AIC 18241.0
+#DF_seasson <- tibble(Model= c("$Estacion \\times Especie + Ambiente+ \\frac{1}{Sitio}$", "$Especie + Ambiente + \\frac{1}{Sitio}$"), AIC= c(17716.1, 18241.0))
+
+#kable(DF_seasson, booktabs=T, escape = F) %>% kable_styling(latex_options = "basic") 
+
+```
+
+
+
+# Bienestar por especie
+
+```{r}
+PorSp <-read_rds("DatosAvance2.rds") %>% dplyr::select(-Ocu_agrupado, -Encuestador, -Ingresos, -Integrantes_familia, -Ingreso_percap)  
+
+#Arreglo data frame encuestas por detalles encontrados en dic2020
+
+PorSp <- PorSp %>% mutate(Distancia_residenciaKm=((1/Distancia_residenciaKm)-1)) %>% 
+    mutate(DesagradoCH= case_when(
+  Desagrado %in% 1~"Estética",
+  Desagrado %in% 2~"Comportamiento",
+  Desagrado %in% 3~"Familiaridad",
+  Desagrado %in% 4~"Simbolismo",
+  Desagrado %in% 5~"Nada le desagrada",
+  Desagrado %in% 6~"Otro")) %>% 
+    mutate(AgradoCH= case_when(
+  Agrado %in% 1~"Estética",
+  Agrado %in% 2~"Comportamiento",
+  Agrado %in% 3~"Familiaridad",
+  Agrado %in% 4~"Simbolismo",
+  Agrado %in% 5~"Nada le agrada",
+  Agrado %in% 6~"Otro")) %>% 
+  mutate(Beneficio_sp_amb = ifelse(Beneficio_sp_amb == 0, NA, Beneficio_sp_amb)) %>% 
+  dplyr::filter(across(everything(), ~ !is.na(.x)))
+
+
+
+# %>% 
+#  mutate(Ambiente=fct_relevel(Ambiente, "Urbano", "Verde", "RocaInt", "PlayaInt", "PlayaNat"))
+#PorSp <- PorSp%>% mutate(Especie=fct_relevel(Especie, "Columba", "Zonotrichia", "Turdus", "Larus", "Phalacrocorax"))
+#sacar NA de todas las columnas
+
+
+```
+
+
+```{r}
+
+#la variable respuesta posee un orden, por eso utilizo este analisis
+PorSp$Beneficio_sp_amb  <- factor(x= as.character(PorSp$Beneficio_sp_amb), ordered= T)
+```
+
+
+```{r}
+#generacion de dummy variables para la variable "que te agrada de las aves?"
+#ParaDummies <- dummyVars(~ AgradoCH  , data = PorSp)
+#VarDum <- predict(ParaDummies, PorSp) %>% as.data.frame()
+#PorSp <- bind_cols(PorSp, VarDum)
+
+
+
+```
+
+
+Se arma el modelo con la variable respuesta y las variables explicativas posibles. Se limita los modelos seleccionados al número de muestras.
+
+```{r, cache=TRUE}
+# Modelo general
+Sp.plr <- polr(Beneficio_sp_amb ~   Ambiente* Especie + FrecPercibida + Conoce_especie + Conoce_nombre + Conoce_origen +AmbOrigen , data = PorSp, Hess=TRUE)
+                                  
+
+options(na.action = "na.fail")
+
+SelectedSp <- dredge(Sp.plr, m.lim = c(0, floor(nrow(PorSp)/10)))
+
+```
+
+
+Se seleccionan los modelos que poseen menos AIC y un delta menor o igual a 2, que son aquellos con mayor peso.
+
+
+```{r}
+#Selecciono solo los modelos que poseen delta <= 2 
+
+FinalSp <- subset(SelectedSp, delta <= 2)
+
+FinalSp_DF <- as.data.frame(FinalSp)
+#Final_Df <- Final_Df[,colSums(is.na(Final_Df))!=nrow(Final_Df)]
+
+kable(FinalSp_DF, digits = 2, booktabs=T) %>%  kable_styling(latex_options = c("scale_down"), font_size = 9)
+```
+
+Como son varios modelos con bajo peso, promedio los modelos seleccionados
+
+```{r, results='asis'}
+
+PromedioSp <-model.avg(FinalSp)
+
+
+```
+
+Obtengo los odds ratios para la interpretacion del modelo
+
+
+```{r}
+ci <- confint(PromedioSp)
+Exp <- exp(cbind(OR = coef(PromedioSp), ci))
+
+kable(Exp, longtable = T, digits = 2, booktabs=T, caption = "Species OddsRratios") %>%  kable_styling(latex_options = c("scale_down"), font_size = 8)
+
+
+
+
+```
+
+
+
+

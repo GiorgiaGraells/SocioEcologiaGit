@@ -1,0 +1,24 @@
+---
+title: "Untitled"
+author: "Giorgia Graells"
+date: "1/2/2021"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+$$
+\begin{aligned}
+\log\left[ \frac { P( \operatorname{1} \geq \operatorname{2} ) }{ 1 - P( \operatorname{1} \geq \operatorname{2} ) } \right] &= -4.16 - 0.22(\operatorname{AgradoCH}_{\operatorname{Estética}}) - 0.13(\operatorname{AgradoCH}_{\operatorname{Familiaridad}}) - 4.04(\operatorname{AgradoCH}_{\operatorname{Nada\ le\ agrada}}) + 1.46(\operatorname{AgradoCH}_{\operatorname{Simbolismo}}) + 0.8(\operatorname{Ambiente}_{\operatorname{PlayaNat}}) + 0.37(\operatorname{Ambiente}_{\operatorname{RocaInt}}) + 1.45(\operatorname{Ambiente}_{\operatorname{RocaNat}}) - 0.02(\operatorname{Ambiente}_{\operatorname{Urbano}}) + 0.93(\operatorname{Ambiente}_{\operatorname{Verde}}) + 0.01(\operatorname{Distancia\_residenciaKm}) + 0.29(\operatorname{Nota\_conocimiento}) + \epsilon \\
+\log\left[ \frac { P( \operatorname{2} \geq \operatorname{3} ) }{ 1 - P( \operatorname{2} \geq \operatorname{3} ) } \right] &= -3.32 - 0.22(\operatorname{AgradoCH}_{\operatorname{Estética}}) - 0.13(\operatorname{AgradoCH}_{\operatorname{Familiaridad}}) - 4.04(\operatorname{AgradoCH}_{\operatorname{Nada\ le\ agrada}}) + 1.46(\operatorname{AgradoCH}_{\operatorname{Simbolismo}}) + 0.8(\operatorname{Ambiente}_{\operatorname{PlayaNat}}) + 0.37(\operatorname{Ambiente}_{\operatorname{RocaInt}}) + 1.45(\operatorname{Ambiente}_{\operatorname{RocaNat}}) - 0.02(\operatorname{Ambiente}_{\operatorname{Urbano}}) + 0.93(\operatorname{Ambiente}_{\operatorname{Verde}}) + 0.01(\operatorname{Distancia\_residenciaKm}) + 0.29(\operatorname{Nota\_conocimiento}) + \epsilon \\
+\log\left[ \frac { P( \operatorname{3} \geq \operatorname{4} ) }{ 1 - P( \operatorname{3} \geq \operatorname{4} ) } \right] &= -2.62 - 0.22(\operatorname{AgradoCH}_{\operatorname{Estética}}) - 0.13(\operatorname{AgradoCH}_{\operatorname{Familiaridad}}) - 4.04(\operatorname{AgradoCH}_{\operatorname{Nada\ le\ agrada}}) + 1.46(\operatorname{AgradoCH}_{\operatorname{Simbolismo}}) + 0.8(\operatorname{Ambiente}_{\operatorname{PlayaNat}}) + 0.37(\operatorname{Ambiente}_{\operatorname{RocaInt}}) + 1.45(\operatorname{Ambiente}_{\operatorname{RocaNat}}) - 0.02(\operatorname{Ambiente}_{\operatorname{Urbano}}) + 0.93(\operatorname{Ambiente}_{\operatorname{Verde}}) + 0.01(\operatorname{Distancia\_residenciaKm}) + 0.29(\operatorname{Nota\_conocimiento}) + \epsilon \\
+\log\left[ \frac { P( \operatorname{4} \geq \operatorname{5} ) }{ 1 - P( \operatorname{4} \geq \operatorname{5} ) } \right] &= -1.6 - 0.22(\operatorname{AgradoCH}_{\operatorname{Estética}}) - 0.13(\operatorname{AgradoCH}_{\operatorname{Familiaridad}}) - 4.04(\operatorname{AgradoCH}_{\operatorname{Nada\ le\ agrada}}) + 1.46(\operatorname{AgradoCH}_{\operatorname{Simbolismo}}) + 0.8(\operatorname{Ambiente}_{\operatorname{PlayaNat}}) + 0.37(\operatorname{Ambiente}_{\operatorname{RocaInt}}) + 1.45(\operatorname{Ambiente}_{\operatorname{RocaNat}}) - 0.02(\operatorname{Ambiente}_{\operatorname{Urbano}}) + 0.93(\operatorname{Ambiente}_{\operatorname{Verde}}) + 0.01(\operatorname{Distancia\_residenciaKm}) + 0.29(\operatorname{Nota\_conocimiento}) + \epsilon \\
+\log\left[ \frac { P( \operatorname{5} \geq \operatorname{6} ) }{ 1 - P( \operatorname{5} \geq \operatorname{6} ) } \right] &= -0.32 - 0.22(\operatorname{AgradoCH}_{\operatorname{Estética}}) - 0.13(\operatorname{AgradoCH}_{\operatorname{Familiaridad}}) - 4.04(\operatorname{AgradoCH}_{\operatorname{Nada\ le\ agrada}}) + 1.46(\operatorname{AgradoCH}_{\operatorname{Simbolismo}}) + 0.8(\operatorname{Ambiente}_{\operatorname{PlayaNat}}) + 0.37(\operatorname{Ambiente}_{\operatorname{RocaInt}}) + 1.45(\operatorname{Ambiente}_{\operatorname{RocaNat}}) - 0.02(\operatorname{Ambiente}_{\operatorname{Urbano}}) + 0.93(\operatorname{Ambiente}_{\operatorname{Verde}}) + 0.01(\operatorname{Distancia\_residenciaKm}) + 0.29(\operatorname{Nota\_conocimiento}) + \epsilon \\
+\log\left[ \frac { P( \operatorname{6} \geq \operatorname{7} ) }{ 1 - P( \operatorname{6} \geq \operatorname{7} ) } \right] &= 0.76 - 0.22(\operatorname{AgradoCH}_{\operatorname{Estética}}) - 0.13(\operatorname{AgradoCH}_{\operatorname{Familiaridad}}) - 4.04(\operatorname{AgradoCH}_{\operatorname{Nada\ le\ agrada}}) + 1.46(\operatorname{AgradoCH}_{\operatorname{Simbolismo}}) + 0.8(\operatorname{Ambiente}_{\operatorname{PlayaNat}}) + 0.37(\operatorname{Ambiente}_{\operatorname{RocaInt}}) + 1.45(\operatorname{Ambiente}_{\operatorname{RocaNat}}) - 0.02(\operatorname{Ambiente}_{\operatorname{Urbano}}) + 0.93(\operatorname{Ambiente}_{\operatorname{Verde}}) + 0.01(\operatorname{Distancia\_residenciaKm}) + 0.29(\operatorname{Nota\_conocimiento}) + \epsilon
+\end{aligned}
+$$
