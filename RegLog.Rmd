@@ -1,5 +1,5 @@
 ---
-title: "Untitled"
+title: "Prueba con polr de MASS"
 author: "Giorgia Graells"
 date: "11/3/2020"
 output:

@@ -136,7 +136,7 @@ Avance <- readRDS("DatosAvance.rds")  %>%dplyr::filter(!is.na(Ambiente_bienestar
 # Figuras por ambiente
 
 Avance <- Avance %>% mutate(Ambiente=fct_relevel(Ambiente, "Urbano", "Verde", "RocaInt", "PlayaInt", "PlayaNat"))
-ggplot(Avance, aes(x=Ambiente, y=Ambiente_bienestar)) + geom_violin() +geom_jitter(aes(color=Ambiente))+theme_classic()+
+ggplot(Avance, aes(x=Ambiente, y=Ambiente_bienestar)) + geom_boxplot(notch=TRUE) +geom_jitter(aes(color=Ambiente))+theme_classic()+
   xlab("Ambientes")+ ylab("Bienestar al ver aves")
 
 #figuras con boxplot y 95%IC
