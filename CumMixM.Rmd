@@ -112,7 +112,7 @@ Para estos resultados se promedian los modelos seleccionados (diferencia entre p
 Promedio <- model.avg(Final, fit = T)
 
 kable(Promedio$coefficients, digits = 2, booktabs=T) %>%  kable_styling(latex_options = c("scale_down"), font_size = 9)
-
+saveRDS(Promedio, "PromedioAmb.rds")
 ```
 
 
@@ -211,7 +211,7 @@ Se arma el modelo con la variable respuesta y las variables explicativas posible
 
 ```{r, cache=TRUE}
 # Modelo general
-Sp.clmm <- clmm(Beneficio_sp_amb ~ Ambiente* Especie + FrecPercibida + Conoce_especie + Conoce_nombre + Conoce_origen +AmbOrigen + (1|ID_encuesta) , data = PorSp)
+Sp.clmm <- clmm(Beneficio_sp_amb ~ Ambiente* Especie + FrecPercibida + Conoce_especie + Conoce_nombre + Conoce_origen +AmbOrigen + (1|ID_encuesta) , data = PorSp, Hess=T)
                               
 options(na.action = "na.fail")
 SelectedSp <- dredge(Sp.clmm, m.lim = c(0, floor(nrow(PorSp)/10)))
@@ -227,7 +227,7 @@ FinalSp <- subset(SelectedSp, delta <= 2)
 FinalSp_DF <- as.data.frame(FinalSp)
 
 #Final_Df <- Final_Df[,colSums(is.na(Final_Df))!=nrow(Final_Df)]
-kable(FinalSp_DF, digits = 2, booktabs=T) %>%  kable_styling(latex_options = c("scale_down"), font_size = 9)
+kable(FinalSp_DF, digits = 2, booktabs=T) %>%  kable_styling(latex_options = c("scale_down"), font_size = 12)
 ```
 
 Como son varios modelos con bajo peso, promedio los modelos seleccionados
@@ -236,7 +236,7 @@ Como son varios modelos con bajo peso, promedio los modelos seleccionados
 
 #PromedioSp <-model.avg(FinalSp)
 BestModelSp <- get.models(SelectedSp, subset = 1)[[1]]
-
+saveRDS(BestModelSp, "BestModelSp.rds")
 ```
 
 Obtengo los odds ratios para la interpretacion del modelo
@@ -246,7 +246,8 @@ Obtengo los odds ratios para la interpretacion del modelo
 ci <- confint(BestModelSp)
 Exp <- exp(cbind(OR = coef(BestModelSp), ci))
 
-kable(Exp, longtable = T, digits = 2, booktabs=T, caption = "Species OddsRratios") %>%  kable_styling(latex_options = c("scale_down"), font_size = 8)
+kable(Exp, longtable = T, digits = 2, booktabs=T, caption = "Species OddsRratios") %>%  
+  kable_styling(latex_options = c("scale_down"), font_size = 8)
 
 ```
 
