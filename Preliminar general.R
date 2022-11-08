@@ -2,8 +2,8 @@
   #analisis preliminar general-figuras
   
   library(tidyverse)
-  library(ggplot2)
-  
+
+  #####################
   DF <- read_csv("/home/giorgia/Documents/Doctorado tesis/SocioEcologiaGit/EncuestaAvesRegistro/respuestas_COMPLETO.csv") %>%  select(-contains("_otro")) 
   
   #### Modificacion variables para analisis
@@ -40,7 +40,7 @@
                                                                     Participacion_avistamiento == 4 ~ 1))
   
  # No se a q corresponde esta parte (27 julio 2020)
-################################################  
+## 
   DF <- DF %>% mutate(AgradoCH= case_when(
     Agrado %in% 1~"Estética (color, forma, tamaño)",
     Agrado %in% 2~"Comportamiento (canto, vuelo, alimentación)",
@@ -54,7 +54,7 @@
     Desagrado %in% 3~"Familiaridad (intrusiva)",
     Desagrado %in% 4~"Simbolismo (representa algo malo o gatilla malos recuerdos)",
     Desagrado %in% 5~"No hay nada que le desagrade"))
-###########################################################
+###
     
   DF <- DF %>% mutate(Ocu_agrupado= case_when(
     Ocupacion %in% c("ASEO", "CUIDADOR AUTOS", "ESTACIONAMIENTO CENTRO CONERCIAL", "GUARDIA DE SEGURIDAD",
@@ -84,10 +84,16 @@
   
   saveRDS(DF, "DF_socio.rds")
   
-  #
+  
+##############################
+  
+DF <- readRDS("DF_socio.rds") 
+  
+###
   
   DF2 <- DF %>% group_by(Sitio, AmbOrigen) %>% summarise(n = n()) %>% 
     ungroup() %>% mutate(Sitio = fct_reorder(as.factor(Sitio),n, .desc = TRUE))
+  
 
 ggplot(DF2, aes(x = fct_reorder(AmbOrigen,n, .desc=TRUE), y = n, group = Sitio)) + geom_col(aes(fill=AmbOrigen), position="dodge", color="black") + 
   geom_text(aes(label = Sitio), size=3.5, position=position_dodge(0.9), angle=90,vjust=0.5, hjust=-0.04 ) + 
@@ -95,11 +101,11 @@ ggplot(DF2, aes(x = fct_reorder(AmbOrigen,n, .desc=TRUE), y = n, group = Sitio))
   scale_fill_brewer(palette = "Dark2") + theme(text=element_text(size=18,  family="Arial"))
 
 ####
-DF3 <- DF %>% group_by( AmbOrigen) %>% summarise(n = n()) 
+DF3 <- DF %>% group_by( AmbOrigen) %>% summarise(n = n()) %>% mutate(AmbOrigen= str_wrap(AmbOrigen, 10))
 ggplot(DF3, aes(x = fct_reorder(AmbOrigen,n, .desc=TRUE), y = n)) + geom_col(aes(fill=AmbOrigen), position="dodge", color="black") + 
-  labs(y="Número de encuestas", x="Ambientes")  + theme_classic()+ ylim(c(0,20))+theme(legend.position = "none")+ 
+  labs(y="Número de encuestas", x=" ")  + theme_classic()+ ylim(c(0,15))+theme(legend.position = "none")+ 
   scale_fill_brewer(palette = "Dark2") + theme(text=element_text(size=18,  family="Arial"))+
-  theme(axis.text.x = element_text(angle=45, vjust= 1, hjust=1))
+  theme(axis.text.x = element_text(angle=0, vjust= 1, hjust=0.5))
 
 
 #####graficos 700x400
@@ -108,19 +114,16 @@ ggplot(DF3, aes(x = fct_reorder(AmbOrigen,n, .desc=TRUE), y = n)) + geom_col(aes
 ggplot(DF) + geom_histogram(aes(Distancia_residenciaKm), color="darkblue", bins = 6)+ labs(y="Número de encuestas", x="Residencia del mar (Km)")  + theme_classic() +
   scale_fill_brewer(palette = "Dark2") + theme(text=element_text(size=18,  family="Arial"))
 
+hist(DF$Distancia_residenciaKm, xlab = "Distancia residencia del mar (Km)", xlim = c(0,200), main=" ", ylab= "Número de encuestas")
+
 #Res<- DF %>% group_by(Distancia_residenciaKm) %>% summarise(N = n())
 #ggplot(Res, aes(x = Distancia_residenciaKm, y=N)) + geom_point(aes( Distancia_residenciaKm)) + stat_smooth(aes(Distancia_residenciaKm), method = "lm", color ="black", formula=y ~ x + I(x^2), alpha=0.5)+
 #  theme_classic()+ ylab("Número de encuestas")+ xlab("Residencia del mar (Km)")+ scale_fill_brewer(palette="Dark2") + theme(text=element_text(size=18,  family="Arial"))
 
 #Ocupación
-ggplot(DF) + geom_bar(aes(Ocu_agrupado))+ labs(y="Número de encuestas", x="Ocupación")  + theme_classic() +
-  theme(axis.text.x = element_text(angle=45, vjust= 1, hjust=1))+ scale_fill_brewer(palette = "Dark2") + 
-  theme(text=element_text(size=18,  family="Arial"))
-
-
-####relacion con el mar
-ggplot(DF) + geom_bar(aes(Relacion_MarNCP))+ labs(y="Número de encuestas", x="Contribución de la naturaleza a las personas")  + theme_classic() +
-    theme(axis.text.x = element_text(angle=60, vjust= 1, hjust=1))+ scale_fill_brewer(palette = "Dark2") + 
+DF <- DF %>% mutate(Ocu_agrupado= str_wrap(Ocu_agrupado, 15))
+ggplot(DF) + geom_bar(aes(Ocu_agrupado), color="black")+ labs(y="Número de encuestas", x="Ocupación")  + theme_classic() +
+  theme(axis.text.x = element_text(angle=0, vjust= 1, hjust=0.5))+ scale_fill_brewer(palette = "Dark2") + 
   theme(text=element_text(size=18,  family="Arial"))
 
 
@@ -128,7 +131,19 @@ ggplot(DF) + geom_bar(aes(Relacion_MarNCP))+ labs(y="Número de encuestas", x="C
 ggplot(DF) + geom_histogram(aes(Ingreso_percap), color="darkred", bins = 6)+ labs(y="Número de encuestas", x="Promedio ingreso per cápita")  + theme_classic() +
   scale_fill_brewer(palette = "Dark2") + theme(text=element_text(size=18,  family="Arial"))
 
+hist(DF$Ingreso_percap, xlab = "Promedio ingreso familiar per cápita", main=" ", ylab= "Número de encuestas")
+
+#nota
+hist(DF$Nota_conocimiento, xlab = "Nota conocimiento en aves", main=" ", ylab= "Número de encuestas")
+nota <- DF %>% group_by(Nota_conocimiento) %>% summarise(N = n())
+
+#ingresos
+
 ING<- DF %>% group_by(Ingreso_percap) %>% summarise(N = n())
+
+ggplot(ING) + geom_col(aes(x=Ingreso_percap, y=N))+ labs(y="Número de encuestas", x="Ingresos percapita")  + theme_classic() +
+  scale_fill_brewer(palette = "Dark2") + theme(text=element_text(size=18,  family="Arial")) +scale_x_continuous(labels = scales::comma)
+
 ggplot(ING, aes(x = Ingreso_percap, y=N)) + geom_point(aes( Ingreso_percap)) + 
   stat_smooth(aes(Ingreso_percap), method = "lm", color ="black", formula=y ~ x + I(x^2), alpha=0.5)+
   theme_classic()+ ylab("Número de encuestas")+ xlab("Ingreso per cápita")+ scale_fill_brewer(palette="Dark2") +
@@ -139,11 +154,50 @@ ggplot(ING, aes(x = Ingreso_percap, y=N)) + geom_point(aes( Ingreso_percap)) +
 
 #edad
 anos<- DF %>% group_by(Edad) %>% summarise(N = n())
+ggplot(anos) + geom_histogram(aes(Edad), bins = 10, color ="black")+ xlim(20, 80)+ ylim(0,10) +theme_classic()+
+  ylab("Número de encuestados")+ theme(axis.text.x = element_text(angle=0, vjust= 1, hjust=0.5))###### ELEGIDO
+
+
+
 ggplot(anos, aes(x = Edad, y=N)) + geom_point(aes(Edad)) + stat_smooth(aes(Edad), method = "lm", color ="black", formula=y ~ x + I(x^2), alpha=0.5)+ 
   theme_classic()+ ylab("Número de encuestas")+ xlab("Edad de encuestados")+ scale_fill_brewer(palette="Dark2") + theme(text=element_text(size=18,  family="Arial"))
 
 ggplot(DF) + geom_histogram(aes(Edad), color="darkgreen", bins = 6)+ labs(y="Número de encuestas", x="Edad")  + theme_classic() +
   scale_fill_brewer(palette = "Dark2") + theme(text=element_text(size=18,  family="Arial"))
+
+
+#genero
+ggplot(DF) + geom_bar(aes(Genero), color ="black")+  ylim(0,27) +theme_classic()+
+  ylab("Número de encuestados") + ###### ELEGIDO
+xlab("Género")
+
+
+
+#relacion con el mar
+
+####relacion con el mar
+DF <- DF %>% mutate(Relacion_MarNCP= str_wrap(Relacion_MarNCP, 15))
+ggplot(DF) + geom_bar(aes(Relacion_MarNCP), color="black")+ labs(y="Número de encuestas", x="Contribución de la naturaleza a las personas")  + theme_classic() +
+  theme(axis.text.x = element_text(angle=0, vjust= 1, hjust=0.5))+ scale_fill_brewer(palette = "Dark2") + 
+  theme(text=element_text(size=18,  family="Arial"))
+
+DF_NCP <- DF %>% 
+  mutate(Relacion_MarNCP=fct_relevel(Relacion_MarNCP, "NO MATERIAL- Exp. físicas y psicológicas", "NO MATERIAL- Soporte de identidad", "NO MATERIAL- Aprendizaje e inspiración",
+                                     "MATERIAL- Materiales y asistencia", "MATERIAL- Alimentación" , "REGULACIÓN- Regulación calidad del aire" )) %>% 
+  mutate(Relacion_MarNCP= str_wrap(Relacion_MarNCP, 15)) 
+
+ggplot(DF_NCP) + geom_bar(aes(Relacion_MarNCP), color ="black")+  ylim(0,40) +theme_classic()+
+  ylab("Número de encuestados") + ###### ELEGIDO
+  xlab("Relación con el mar")+theme(axis.text.x = element_text(angle=0, vjust= 1, hjust=0.5))
+
+#ave favorita
+DF <- DF %>%  str(ifelse(Ave_favorita== "NO", "NINGUNA", Ave_favorita))
+
+ggplot(DF) + geom_bar(aes(Ave_favorita), color ="black")+  ylim(0,15) +theme_classic()+
+  ylab("Número de encuestados") + ###### ELEGIDO
+  xlab("Ave favorita")+
+  theme(axis.text.x = element_text(angle=90, vjust= 0.5, hjust=1))
+
 
 #ingresos
 

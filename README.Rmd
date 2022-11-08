@@ -38,3 +38,7 @@ Esto fue arreglado en el código de **RegLog.Rmd**
 Nuevos modelos considerando la variable de los encuestados como un factor aleatorio.
 Se utilizó la funcion clmm en el docuemnto **CumMixM.Rmd**, junto con esto esta el documento **Ecuacion.Rmd** que describe la ecuacion del modelo ambiental seleccionado y **Curvas.R** desde donde se extrae la iformacin de los modelos para armar las predicciones y los graficos para las variables seleccionadas.
 
+##### Manuscrito
+
+Se preparó el borrador en **manuscrito.Rmd** en donde se encuentran las tablas y figuras exploratorias utilizadas para escribir el articulo que esta siendo revisado en googleDocs
+

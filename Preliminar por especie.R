@@ -2,6 +2,7 @@
 
 library(tidyverse)
 
+#############
 Val <- read_csv("/home/giorgia/Documents/Doctorado tesis/Encuesta/EncuestaAvesRegistro/respuestas_COMPLETO.csv") %>%  select(-contains("_otro")) 
 Val <- Val %>% mutate_if(is.character, str_to_upper)
 
@@ -42,28 +43,7 @@ Resp<- Val %>% select(ID_encuesta, Relacion_MarNCP, Ocu_agrupado, Encuestador, S
                        Genero, Ingresos, Integrantes_familia, Nota_conocimiento, Participacion_avistamiento, AmbOrigen)
 
 
-#################################################
-
-#Modificando y juntando las variables
-
-respBien <- Val %>% select(ID_encuesta, starts_with("Bienestar")) %>% pivot_longer(cols = starts_with("Bienestar"), names_to = "Bienestar_amb", values_to = "Ambiente_bienestar") %>% dplyr::filter(!is.na(Ambiente_bienestar))  %>% mutate(Ambiente = str_remove_all(Bienestar_amb, "Bienestar_aves_"))  %>% select(-Bienestar_amb) %>% mutate(Ambiente=ifelse(Ambiente=="Verdes", "Verde", Ambiente))
-respAgrado <- Val %>% select(ID_encuesta, starts_with("Agrado_aves")) %>% pivot_longer(cols = starts_with("Agrado_aves"), names_to = "Agrado_aves", values_to = "Agrado") %>% dplyr::filter(!is.na(Agrado))  %>% mutate(Ambiente = str_remove_all(Agrado_aves, "Agrado_aves_"))  %>% select(-Agrado_aves)
-respDesgrado <- Val %>% select(ID_encuesta, starts_with("Desagrado_aves")) %>% pivot_longer(cols = starts_with("Desagrado_aves"), names_to = "Desagrado_aves", values_to = "Desagrado") %>% dplyr::filter(!is.na(Desagrado))  %>% mutate(Ambiente = str_remove_all(Desagrado_aves, "Desagrado_aves_"))  %>% select(-Desagrado_aves)
-
-respFrecVis <- Val %>% select(ID_encuesta, starts_with("Frec_visita")) %>% pivot_longer(cols = starts_with("Frec_visita"), names_to = "Ambiente_Frec_visita", values_to = "Frec_visita") %>% dplyr::filter(!is.na(Frec_visita))  %>% mutate(Ambiente = str_remove_all(Ambiente_Frec_visita, "Frec_visita_"))  %>% select(-Ambiente_Frec_visita)
-respFrecInf <- Val %>% select(ID_encuesta, starts_with("Frec_infancia")) %>% pivot_longer(cols = starts_with("Frec_infancia"), names_to = "Ambiente_Frec_infancia", values_to = "Frec_infancia") %>% dplyr::filter(!is.na(Frec_infancia))  %>% mutate(Ambiente = str_remove_all(Ambiente_Frec_infancia, "Frec_infancia_"))  %>% select(-Ambiente_Frec_infancia)
-
-#por especie
-respConoce <- Val %>% select(ID_encuesta, starts_with("Conoce")) %>% pivot_longer(cols = starts_with("Conoce"), names_to = "Especie_conoce", values_to = "Conoce_especie") %>% dplyr::filter(!is.na(Conoce_especie))  %>% mutate(Especie = str_remove_all(Especie_conoce, "Conoce_"))  %>% select(-Especie_conoce)
-respNombre <- Val %>% select(ID_encuesta, starts_with("Nombre")) %>% pivot_longer(cols = starts_with("Nombre"), names_to = "Especie_nombre", values_to = "Nombre_especie")%>% dplyr::filter(!is.na(Nombre_especie)) %>% mutate(Especie = str_remove_all(Especie_nombre, "Nombre_"))  %>% select(-Especie_nombre)
-
-#por especie y ambiente
-respBenef <- Val %>% select(ID_encuesta, starts_with("Benef")) %>% pivot_longer(cols = starts_with("Benef"), names_to = "Especie_ambiente_benef", values_to = "Beneficio_sp_amb")  %>% dplyr::filter(!is.na(Beneficio_sp_amb))      %>%      mutate(Especie = str_split(string =Especie_ambiente_benef, pattern = "_", simplify = T, n = 3)[,2], Ambiente = str_split(string =Especie_ambiente_benef, pattern = "_", simplify = T, n = 3)[,3]) %>% select(-Especie_ambiente_benef)
-respFrecPer <- Val %>% select(ID_encuesta, starts_with("FrecPercib")) %>% pivot_longer(cols = starts_with("FrecPercib"), names_to = "Especie_Ambiente_Frec", values_to = "FrecPercibida") %>% dplyr::filter(!is.na(FrecPercibida)) %>% mutate(Especie = str_split(string =Especie_Ambiente_Frec, pattern = "_", simplify = T, n = 3)[,2],  Ambiente = str_split(string =Especie_Ambiente_Frec, pattern = "_", simplify = T, n = 3)[,3]) %>% select(-Especie_Ambiente_Frec)
-
-#origen por especie
-respOrigen <- Val %>% select(ID_encuesta, starts_with("Origen")) %>% pivot_longer(cols = starts_with("Origen"), names_to = "Especie_origen", values_to = "Origen")  %>% dplyr::filter(!is.na(Origen))  %>% mutate(Especie = str_remove_all(Especie_origen, "Origen_"))  %>% select(-Especie_origen) 
-
+####
 ###################
 #union de variables
 
@@ -72,7 +52,7 @@ Avance2 <- full_join(Resp, respBien)  %>% full_join(respAgrado) %>%  full_join(r
   full_join(respOrigen) %>% distinct() %>%  dplyr::filter(!is.na(Encuestador))
 
 
-#####################################
+####
 #modificacion variables para analisis
 Avance2 <- Avance2 %>% mutate(Residencia_costa= ifelse(Residencia_costa==2 , 0, 1), Distancia_residenciaKm= (1/(Distancia_residenciaKm+1)))
 
@@ -138,6 +118,14 @@ Avance2 <- Avance2 %>% mutate(Origen= case_when( Origen== 1 ~ "Terrestre",
 Avance2 <- Avance2 %>% mutate(Conoce_especie= ifelse(Conoce_especie==2 , 0, 1))
 
 
+#Arreglar data = en beneficio de ver ave por ambiente para q quede en NA ya q fue una falta de respuesta
+#Asi uedan todos los valores de satisfaccion entre 1 y 7
+
+Avance2 %>% dplyr::mutate(Beneficio_sp_amb = ifelse(Beneficio_sp_amb == 0, NA, Beneficio_sp_amb))
+
+
+
+
 saveRDS(Avance2, "DatosAvance2.rds")
 
 
@@ -148,9 +136,9 @@ Avance2 <- Avance2 %>% mutate(Especie=fct_relevel(Especie, "Columba", "Zonotrich
 
 #general 600x400
 
-ggplot(Avance2, aes(x=Especie, y=Beneficio_sp_amb)) +geom_jitter(aes(color=Especie))+ geom_boxplot(notch=T) +
+ggplot(Avance2, aes(x=Especie, y=Beneficio_sp_amb))+ geom_boxplot(notch=T) +geom_jitter(aes(color=Especie)) +
   theme_classic()+
-  xlab("Especies")+ ylab("Bienestar especies-ambiente")
+  xlab("Especies")+ ylab("Bienestar especies")
 
 
 ggplot(Avance2, aes(x=Ambiente, y=Beneficio_sp_amb)) + geom_violin() +geom_jitter(aes(color=Especie))+theme_classic()+
@@ -158,12 +146,15 @@ ggplot(Avance2, aes(x=Ambiente, y=Beneficio_sp_amb)) + geom_violin() +geom_jitte
 ggplot(Avance2, aes(x=Ambiente, y=Beneficio_sp_amb)) +geom_jitter(aes(color=Especie))+ geom_boxplot(notch=T) + facet_wrap(~Especie)+theme_classic()+
   xlab("Ambientes")+ ylab("Bienestar especies-ambiente")
 
-ggplot(Avance2, aes(x=Especie, y=Beneficio_sp_amb)) + geom_boxplot(notch=T) + facet_wrap(~Ambiente)+theme_classic()+
+ggplot(Avance2, aes(x=Ambiente, y=Beneficio_sp_amb)) + geom_boxplot(notch=T) + facet_wrap(~Especie)+theme_classic()+
   xlab("Ambientes")+ ylab("Bienestar especies-ambiente")
 #
 
 ggplot(Avance2, aes(x=FrecPercibida, y=Beneficio_sp_amb))+ geom_smooth(method=lm, se=FALSE,aes(color=Especie))+
   geom_point(aes(color=Especie)) +  xlab("Frecuencia percibida por especie")+ylab("Beneficio percibido por especie") +theme_classic()
+ggplot(Avance2, aes(x=FrecPercibida, y=Beneficio_sp_amb))+ geom_smooth(method=lm, se=FALSE,aes(color=Ambiente))+
+  geom_point(aes(color=Ambiente))+theme_classic()
+
 
 ggplot(Avance2, aes(x=FrecPercibida, y=Beneficio_sp_amb))+ geom_smooth(method=lm, se=FALSE,aes(color=Genero))+
   geom_point(aes(color=Genero))+theme_classic()
@@ -174,8 +165,7 @@ ggplot(Avance2, aes(x=FrecPercibida, y=Beneficio_sp_amb))+ geom_smooth(method=lm
 ggplot(Avance2, aes(x=FrecPercibida, y=Beneficio_sp_amb))+ geom_smooth(method=lm, se=FALSE,aes(color=Sitio))+
   geom_point(aes(color=Sitio))+theme_classic()
 
-ggplot(Avance2, aes(x=FrecPercibida, y=Beneficio_sp_amb))+ geom_smooth(method=lm, se=FALSE,aes(color=Ambiente))+
-  geom_point(aes(color=Ambiente))+theme_classic()
+
 
 ggplot(Avance2, aes(x=FrecPercibida, y=Beneficio_sp_amb))+ geom_smooth(method=lm, se=FALSE,aes(color=ID_encuesta))+
   geom_point(aes(color=ID_encuesta))+theme_classic()
@@ -214,13 +204,19 @@ ggplot(Avance2, aes(x=Participacion_avistamiento, y=Beneficio_sp_amb))+ geom_smo
 #conocimiento especie
 
 ggplot(Avance2, aes(x=Conoce_nombre, y=Beneficio_sp_amb))+ geom_smooth(method=lm, se=FALSE,aes(color=Especie))+
-  geom_point(aes(color=Especie))+theme_classic()
+  geom_point(aes(color=Especie))+theme_classic()+ ylab("Beneficio percibido por especie")+
+  xlab("Conoce el nombre de la especie")
 
 ggplot(Avance2, aes(x=Conoce_especie, y=Beneficio_sp_amb))+ geom_smooth(method=lm, se=FALSE,aes(color=Especie))+
-  geom_point(aes(color=Especie))+theme_classic()
+  geom_point(aes(color=Especie), alpha=10)+theme_classic()+ ylab("Beneficio percibido por especie")+
+  xlab("Conoce a la especie")
 
+Avance2 %>% group_by(Especie, Conoce_especie) %>% summarise(N = n())
+
+ 
 ggplot(Avance2, aes(x=Conoce_origen, y=Beneficio_sp_amb))+ geom_smooth(method=lm, se=FALSE,aes(color=Especie))+  
-  geom_point(aes(color=Especie))+theme_classic()
+  geom_point(aes(color=Especie))+theme_classic()+ ylab("Beneficio percibido por especie")+
+  xlab("Conoce origen de la especie")
 
 ########################################
 #############figuras para cada ave
@@ -285,8 +281,10 @@ ggplot(Avance2, aes(x=FrecPercibida, y=Beneficio_sp_amb))+geom_smooth(method=lm,
   ggplot(Avance2, aes(x=FrecPercibida, y=Beneficio_sp_amb))+geom_smooth(method=lm, se=FALSE,aes(color=Conoce_especie))+geom_point(aes(color=Conoce_especie))+ 
     xlab("Frecuencia percibida por especie")+ylab("Beneficio percibido por especie") + facet_wrap(~Especie)+theme_classic()
   
+ 
   
   #####graficos por presencia real de la especie y su detectabilidad
   ggplot(Avance2, aes(x=FrecPercibida, y=Beneficio_sp_amb))+geom_smooth(method=lm, se=FALSE,aes(color=Ambiente))+geom_point(aes(color=Ambiente))+ 
     xlab("Frecuencia percibida por especie")+ylab("Beneficio percibido por especie") + facet_wrap(~Especie)+theme_classic()
+  
   

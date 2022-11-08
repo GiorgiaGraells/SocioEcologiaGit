@@ -3,6 +3,7 @@
 library(tidyverse)
 library(ggplot2)
 
+###############
 Bien <- read_csv("/home/giorgia/Documents/Doctorado tesis/Encuesta/EncuestaAvesRegistro/respuestas_COMPLETO.csv") %>%  select(-contains("_otro")) 
 Bien <- Bien %>% mutate_if(is.character, str_to_upper)
   
@@ -60,13 +61,13 @@ respDesgrado <- Bien %>% select(ID_encuesta, starts_with("Desagrado_aves")) %>% 
 respFrecVis <- Bien %>% select(ID_encuesta, starts_with("Frec_visita")) %>% pivot_longer(cols = starts_with("Frec_visita"), names_to = "Ambiente_Frec_visita", values_to = "Frec_visita") %>% dplyr::filter(!is.na(Frec_visita))  %>% mutate(Ambiente = str_remove_all(Ambiente_Frec_visita, "Frec_visita_"))  %>% select(-Ambiente_Frec_visita)
 respFrecInf <- Bien %>% select(ID_encuesta, starts_with("Frec_infancia")) %>% pivot_longer(cols = starts_with("Frec_infancia"), names_to = "Ambiente_Frec_infancia", values_to = "Frec_infancia") %>% dplyr::filter(!is.na(Frec_infancia))  %>% mutate(Ambiente = str_remove_all(Ambiente_Frec_infancia, "Frec_infancia_"))  %>% select(-Ambiente_Frec_infancia)
 
-###################
+###
 #union de variables
 
 Avance <- full_join(Resp, respBien)  %>% full_join(respAgrado) %>%  full_join(respDesgrado) %>% 
    full_join(respFrecVis) %>% full_join(respFrecInf) %>% distinct()
 
-#####################################
+####
 #modificacion variables para analisis
 Avance <- Avance %>% mutate(Residencia_costa= ifelse(Residencia_costa==2 , 0, 1), Distancia_residenciaKm= (1/(Distancia_residenciaKm+1)))
 
@@ -125,13 +126,13 @@ saveRDS(Avance, "DatosAvance.rds")
 #correr desde aca
 
 Avance <- readRDS("DatosAvance.rds")  %>%dplyr::filter(!is.na(Ambiente_bienestar)) #%>%
-  mutate(Ambiente_encuesta= case_when(
-  Sitio %in% c("CASA", "LAS SIRENAS", "PARQUE EL LITRE", "PLAZA RECREO", "PLAZA GABRIELA MISTRAL")~"VERDE",
-  Sitio %in% c("LAGHU YOGA", "RENACA CENTRO")~"URBANO",
-  Sitio %in% c("LAGUNA VERDE", "PLAYA NEGRA", "HUMEDAL RENACA", "LAS SALINAS")~"PLAYA NATURAL",
-  Sitio %in% c("PLAYA AMARILLA", "SECTOR 5", "LOS LILENES")~"PLAYA INTERVENIDA",
-  Sitio %in% c("ROCA OCEANICA")~"ROCA NATURAL",
-  Sitio %in% c("CLUB YATES", "MUELLE BARON")~"ROCA INTERVENIDA"))
+  # mutate(Ambiente_encuesta= case_when(
+  # Sitio %in% c("CASA", "LAS SIRENAS", "PARQUE EL LITRE", "PLAZA RECREO", "PLAZA GABRIELA MISTRAL")~"VERDE",
+  # Sitio %in% c("LAGHU YOGA", "RENACA CENTRO")~"URBANO",
+  # Sitio %in% c("LAGUNA VERDE", "PLAYA NEGRA", "HUMEDAL RENACA", "LAS SALINAS")~"PLAYA NATURAL",
+  # Sitio %in% c("PLAYA AMARILLA", "SECTOR 5", "LOS LILENES")~"PLAYA INTERVENIDA",
+  # Sitio %in% c("ROCA OCEANICA")~"ROCA NATURAL",
+  # Sitio %in% c("CLUB YATES", "MUELLE BARON")~"ROCA INTERVENIDA"))
 
 # Figuras por ambiente
 
@@ -144,6 +145,7 @@ ggplot(Avance, aes(x=Ambiente, y=Ambiente_bienestar)) + geom_boxplot(notch=TRUE)
 Avance <- Avance %>% mutate(Ambiente=fct_relevel(Ambiente, "Urbano", "RocaInt", "PlayaInt", "Verde","RocaNat"))
 ggplot(Avance, aes(x=Ambiente, y=Ambiente_bienestar)) + geom_boxplot(notch=TRUE) +theme_classic()+
   xlab("Ambientes")+ ylab("Bienestar al ver aves") 
+
 
 #considerando el ambiente donde se realizó la encuesta
 
@@ -192,7 +194,7 @@ ggplot(Avance, aes(x=Ambiente, y=Ambiente_bienestar)) + geom_violin() +geom_jitt
   xlab("Ambiente")+ ylab("Bienestar al ver aves")+ facet_wrap(~Frec_visita,4)+theme(axis.text.x = element_text(angle=45, vjust= 1, hjust=1))
 
 #considerando amb preuntado y donde se realizó la encuesta
-ggplot(Avance, aes(x=Ambiente, y=Ambiente_bienestar)) + geom_violin() +geom_jitter(aes(color=AmbOrigenta))+theme_classic()+
+ggplot(Avance, aes(x=Ambiente, y=Ambiente_bienestar)) + geom_violin() +geom_jitter(aes(color=AmbOrigen))+theme_classic()+
   xlab("Ambiente")+ ylab("Bienestar al ver aves")+ facet_wrap(~Frec_visita,4)+theme(axis.text.x = element_text(angle=45, vjust= 1, hjust=1))
 
 #considerando amb preuntado y donde se realizó la encuesta
@@ -209,25 +211,43 @@ ggplot(Avance, aes(x=Ambiente, y=Ambiente_bienestar)) + geom_violin() +geom_jitt
 #Bienestar vs distancia residencia
 
 ggplot(Avance, aes(x=Distancia_residenciaKm, y=Ambiente_bienestar)) + geom_smooth(method=lm, se=FALSE,aes(color=Ambiente))+
-  geom_point(aes(color=Ambiente))+ xlab("Distancia residencia del mar 1/(Km+1)") +ylab("Bienestar al ver aves")+ theme_classic()
+  geom_point(aes(color=Ambiente))+ xlab("Distancia residencia del mar") +ylab("Bienestar al ver aves")+ theme_classic()
 # roca nat y playa nat son similares y siempre  valorados
 # mientras mas cerca de la costa vivan las personas mas valoran area verde, roca int y  playa int
 # mientras mas cercano a la costa vivan las personas menos valoran el ver aves en zonas urbanas
+
+#Bienestar vs nota conociminneto
+
+ggplot(Avance, aes(x=Nota_conocimiento, y=Ambiente_bienestar)) + geom_smooth(method=lm, se=FALSE,aes(color=Ambiente))+
+  geom_point(aes(color=Ambiente))+ xlab("Nota conocimiento sobre aves") +ylab("Bienestar al ver aves")+ theme_classic()
 
 
 #Bienestar vs relacion con el marNCP
 Avance <- Avance %>% mutate(Relacion_MarNCP=fct_relevel(Relacion_MarNCP, "NO MATERIAL- Exp. fís. y psic.",  "MATERIAL- Materiales y asistencia",  
                                                         "NO MATERIAL- Sop. identidad","NO MATERIAL- Aprendizaje e insp.",
-                                                         "REGULACIÓN- Reg. cal. aire", "MATERIAL- Alimentación"))
+                                                         "REGULACIÓN- Reg. cal. aire", "MATERIAL- Alimentación")) %>% 
+  mutate(Relacion_MarNCP= str_wrap(Relacion_MarNCP, 18))
 ggplot(Avance, aes(x=Relacion_MarNCP, y=Ambiente_bienestar))+ geom_violin() +geom_jitter(aes(color=Ambiente))+
   xlab("Relación con el mar") +ylab("Bienestar al ver aves")+ theme_classic()+theme(axis.text.x = element_text(angle=70, vjust= 1, hjust=1))
   
+ggplot(Avance, aes(x=Relacion_MarNCP, y=Ambiente_bienestar))+ geom_boxplot(aes(color=Ambiente), notch = TRUE) +
+  xlab("Relación con el mar") +ylab("Bienestar al ver aves")+ theme_classic()+theme(axis.text.x = element_text(angle=0, vjust= 1, hjust=0.5))
 
-ggplot(Avance, aes(x=Ambiente, y=Ambiente_bienestar)) + geom_violin() +geom_jitter(aes(color=Relacion_MarNCP))+
+
+
+
+#ggplot(Avance, aes(x=Ambiente, y=Ambiente_bienestar)) + geom_violin() +geom_jitter(aes(color=Relacion_MarNCP))+
   theme_classic()+ xlab("Ambientes")+ ylab("Bienestar al ver aves")+theme(axis.text.x = element_text(angle=60, vjust= 1, hjust=1))
+
+ggplot(Avance, aes(x=Ambiente, y=Ambiente_bienestar)) + geom_boxplot(aes(color=Relacion_MarNCP))+
+  theme_classic()+ xlab("Ambientes")+ ylab("Bienestar al ver aves") +
+  theme(axis.text.x = element_text(angle=0, vjust= 1, hjust=0.5))+
+  scale_colour_()
+
+
 Avance <- Avance %>% mutate(Relacion_MarNCP=fct_relevel(Relacion_MarNCP, "MATERIAL- Materiales y asistencia","MATERIAL- Alimentación", "REGULACIÓN- Reg. cal. aire",
                                                         "NO MATERIAL- Exp. fís. y psic.", "NO MATERIAL- Sop. identidad","NO MATERIAL- Aprendizaje e insp."))
-ggplot(Avance, aes(x=Ambiente, y=Ambiente_bienestar)) + geom_boxplot()+facet_wrap(~Relacion_MarNCP)+
+ggplot(Avance, aes(x=Ambiente, y=Ambiente_bienestar)) + geom_boxplot(notch = TRUE) + facet_wrap(~Relacion_MarNCP)+
   theme_classic()+ xlab("Ambientes")+ ylab("Bienestar al ver aves")+theme(axis.text.x = element_text(angle=60, vjust= 1, hjust=1))
 
 
@@ -237,9 +257,13 @@ ggplot(Avance, aes(x=Ambiente, y=Ambiente_bienestar)) + geom_boxplot()+facet_wra
 ggplot(Avance, aes(x=Ambiente, y=Ambiente_bienestar)) + geom_violin() +geom_jitter(aes(color=AgradoCH))+
   theme_classic()+ xlab("Ambientes")+ ylab("Bienestar al ver aves")+theme(axis.text.x = element_text(angle=60, vjust= 1, hjust=1))
 
-Avance2 <-Avance  %>% dplyr::filter(AgradoCH!="Nada le agrada")
-ggplot(Avance2, aes(x=Ambiente, y=Ambiente_bienestar)) + geom_violin() +geom_jitter(aes(color=AgradoCH))+
-  theme_classic()+ xlab("Ambientes")+ ylab("Bienestar al ver aves")+theme(axis.text.x = element_text(angle=60, vjust= 1, hjust=1))
+Avance2 <-Avance  %>% dplyr::filter(AgradoCH!="Otro") %>% 
+  mutate(AgradoCH=fct_relevel(AgradoCH, "Comportamiento", "Estética", "Familiaridad", "Simbolismo"))
+#ggplot(Avance2, aes(x=Ambiente, y=Ambiente_bienestar)) + geom_violin() +geom_jitter(aes(color=AgradoCH))+
+#  theme_classic()+ xlab("Ambientes")+ ylab("Bienestar al ver aves")+theme(axis.text.x = element_text(angle=60, vjust= 1, hjust=1))
+
+ggplot(Avance2, aes(x=AgradoCH, y=Ambiente_bienestar))+ geom_boxplot(aes(color=Ambiente), notch = TRUE) +
+  xlab("Servicio percibido al ver aves") +ylab("Bienestar al ver aves")+ theme_classic()+theme(axis.text.x = element_text(angle=0, vjust= 1, hjust=0.5))
 
 
 ggplot(Avance, aes(x=Ambiente, y=Ambiente_bienestar)) + geom_violin() +geom_jitter(aes(color=DesagradoCH))+

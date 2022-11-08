@@ -1,0 +1,380 @@
+---
+title: "Evaluación de encuestas"
+author: "Giorgia Graells"
+date: "1/31/2022"
+output:
+  html_document:
+    df_print: paged
+  word_document: default
+---
+
+```{r setup, include=FALSE, comment=FALSE, echo=FALSE, message=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, error = FALSE, message = FALSE)
+library(tidyverse)
+library(kableExtra)
+
+```
+
+
+
+#### Introducción
+
+
+Existen tres preguntas:
+
+1. ¿Cómo se relacionan las personas con el mar en las ciudades costeras?
+2. ¿Cómo se relacionan la personas con las aves en las ciudades costeras?, ¿existen diferencias en los distintos ambientes que se pueden encontrar en ellas?
+3. ¿Cómo cambia la percepcion de distintas especies en estos distintos ambientes?, ¿varía el beneficio percibido dependiendo de si la especie es más natural en el ambiente?
+
+
+#### Metodología
+
+
+
+**Relación de las personas con el mar en ciudades costeras.**
+
+La relación de las personas con el mar fue medido mediante una pregunta abierta sobre su relación con el mar. La pregunta iba enfocada a la conexión con el mar o la actividad que más realizaban cuando visitaban el borde costero. Las respuestas fueron clasificadas en base a las categoridas definidas por los Nature's Contributions to People.
+
+
+**Relación de las personas con las aves en ambientes de las ciudades costeras.**
+
+Para determinar la relación de las personas con las aves en distintos ambientes de las ciudades costeras, se consultó el grado de satisfacción al ver aves. El nivel de satisfacción fue definido de 1 a 7, donde 1 corresponde a un desagrado al ver aves en un determinado ambiente y 7 corresponde a una alta satisfacción al ver aves en un determinado ambiente. Se consultó a las personas por seis ambientes ubicados en las ciudades costeras: playa natural, playa modificada, roquerío natural, roquerío modificado, interior semi-natural e interior modificado.
+
+Para identificar las diferencias entre ambientes, se consultó qué es lo que a las personas les agrada de las aves en cada uno de ellos. Esta pregunta se basó en los servicios ecosistémicos entregados por las aves: Servicios estéticos, comportamiento, familiaridad y simbolismo.
+
+También se consultó qué es lo que a las personas les desagrada de las aves en cada uno de los ambientes. Esta pregunta se basó en los dis servicios ecosistémicos entregados por las aves: Dis servicios estéticos, comportamiento, familiaridad y simbolismo.
+
+
+**Percepción de especies por ambiente.**
+
+Se preguntó por el bienestar percibido al ver seis especies distintas de aves en los distintos ambientes. Las especies consultadas fueron *Columba livia*, *Zonotrichia capensis*, *Turdus falcklandii*, *Larus dominicanus*, *Phalacrocorax brasilianus* y *Pelecanus thagus*. Las personas calificaron su bienestar de 1 a 7, donde 1 corresponde a un desagrado al ver aves en un determinado ambiente y 7 corresponde a una alta satisfacción al ver aves en un determinado ambiente.
+
+Se realizó una comparación entre medianas de las frecuencias percibida y frecuencias observadas.
+La frecuencia percibida corresponde a la percepción de la presencia  de especies por las personas encuestadas. Se le preguntó a 50 personas que si visitan un determinado ambiente durante siete días, cuantos días de una semana verían a cada una de las seis especies descritas. La frecuencia observada además es dividida por siete para demostrar la probabilidad de percibir a esa especie en ese ambiente en un día.
+La frecuencia observada corresponde a la abundancia determinada por los muestreos de aves en cada sitio. El monitoreo de aves fue realizado por muestreo de punto en seis sitios por cada ambiente determinado. Los muestreos fueron realizados durante tres dias por sitio, por lo que la frecuencia se encuentra dada por la probabilidad de frecuencia de ver una especie en un día.
+
+Además se consultó a las personas el origen de las seis especies (marino o terrestre) para poder considerar la naturalidad percibida de las especies en cada ambiente.
+
+
+
+#### Resultados
+
+La mayor parte de los encuestados se relacionan con el mar de una forma no material, a través de experiencias físicas y psicológicas (Fig.1). Estas experiencias incluyen realizar caminatas por la orilla del mar, sentarse en la playa a descansar, leer o tomar sol, hacer picnics, deportes o yoga, entre otros.
+
+```{r}
+#Ave favorita
+DF <- readRDS("DF_socio.rds") 
+#traducción al  ingles y arreglo 
+
+
+DF_favorita <- DF %>% mutate(Favorite= case_when(
+            Ave_favorita == "NO"~ "I do not have any favorite bird",
+            Ave_favorita == "INGUNA"~ "I do not have any favorite bird",
+            Ave_favorita == "NINGUNA"~ "I do not have any favorite bird",
+            Ave_favorita == "AGUILUCHO" ~ "Varible hawk (Geranoaetus polyosoma)",
+            Ave_favorita == "ALBATROS" ~ "Black-browed albatross (Thalassarche melanophrys",
+            Ave_favorita == "CORMORAN" ~ "Neotropic cormorant (Phalacrocorax brasilianus)",
+            Ave_favorita == "GAV MONJA" ~ "Inca tern (Larosterna inca)",
+            Ave_favorita == "GAVIOTIN MONJA" ~ "Inca tern (Larosterna inca)",
+            Ave_favorita == "GAVIOTA" ~ "Kelp gull (Larus dominicanus)",
+            Ave_favorita == "GAVIOTAS" ~ "Kelp gull (Larus dominicanus)",
+            Ave_favorita == "GAVIOTIN" ~ "South American tern (Sterna hirundinacea)",
+            Ave_favorita == "GOLONDRINA" ~ "Chilean swalow (Tachycineta leucopyga)",
+            Ave_favorita == "GORRION" ~ "House sparrow (Passer domesticus)",
+            Ave_favorita == "PELICANO" ~ "Peruvian pelican (Pelecanus thagus)",
+            Ave_favorita == "PERRITO" ~ "White-backed stilt (Himantopus melanurus)",
+            Ave_favorita == "PILPILEN" ~ "American oystercatcher (Haematopus palliatus)",
+            Ave_favorita == "PINGUINO" ~ "Humboldt penguin (Pingüino de Humboldt)",
+            Ave_favorita == "PIQUERO" ~ "Peruvian booby (Sula variegata)",
+            Ave_favorita == "TODOS" ~ "I like all birds",
+            Ave_favorita == "TORTOLA" ~ "Eared dove (Zenaida auriculata)",
+            Ave_favorita == "ZARAPITO" ~ "Eurasian whimbrel (Numenius phaeopus)")) %>% group_by(Favorite) %>% summarise(n=n()) 
+  
+
+kable(DF_favorita, align = "l", caption = "Table 1") %>%
+ kable_paper(full_width = F) %>%
+collapse_rows(columns = 1, valign = "top")
+
+ggplot(DF_favorita) + geom_col(aes(x=reorder(Favorite, n), y=n), color ="black")+  ylim(0,15) +theme_classic()+
+  ylab("Number of surveys") +  xlab("Favorite bird")+
+  theme(axis.text.x = element_text(angle=90, vjust= 0.5, hjust=1)) + coord_flip()
+
+```
+
+
+```{r, fig.cap= "Fig 1. Relación con el mar a partir de NCP (Nature contributions to people)"}
+
+DF <- readRDS("DF_socio.rds") 
+
+DF_NCP <- DF %>% 
+  mutate(Relacion_MarNCP=fct_relevel(Relacion_MarNCP, "NO MATERIAL- Exp. físicas y psicológicas", "NO MATERIAL- Soporte de identidad", "NO MATERIAL- Aprendizaje e inspiración", "MATERIAL- Materiales y asistencia", "MATERIAL- Alimentación" , "REGULACIÓN- Regulación calidad del aire" )) %>% 
+mutate(Relacion_MarNCP= case_when(Relacion_MarNCP== "NO MATERIAL- Exp. físicas y psicológicas"~"NON MATERIAL- Physical and psychological experiences",
+                                  Relacion_MarNCP== "NO MATERIAL- Soporte de identidad"~ "NON MATERIAL- Supporting identities", 
+                                  Relacion_MarNCP== "NO MATERIAL- Aprendizaje e inspiración"~"NON MATERIAL- Learning and inspiration ",
+                                  Relacion_MarNCP== "MATERIAL- Materiales y asistencia"~"MATERIAL- Materials, companionship and labor",
+                                  Relacion_MarNCP== "MATERIAL- Alimentación"~"MATERIAL- Food and feed " ,
+                                  Relacion_MarNCP== "REGULACIÓN- Regulación calidad del aire"~"REGULATION-Regulation of air quality" ))  %>% 
+  mutate(Relacion_MarNCP= str_wrap(Relacion_MarNCP, 15)) 
+
+ggplot(DF_NCP) + geom_bar(aes(Relacion_MarNCP), color ="black")+  ylim(0,40) +theme_classic()+
+  ylab("Number of people") + ###### ELEGIDO
+  xlab("Relation with the coast")+theme(axis.text.x = element_text(angle=0, vjust= 1, hjust=0.5))
+
+```
+
+
+```{r}
+#Tabla comparativa NCP
+Tabla_DF_NCP<- DF_NCP %>%  dplyr::select(Relacion_MarNCP) %>% group_by(Relacion_MarNCP) %>% 
+  summarise(N=n()) 
+
+kable(Tabla_DF_NCP, align = "l") #%>% kable_paper(full_width = F) %>%collapse_rows(columns = 1, valign = "top")
+
+```
+
+
+La satisfacción percibida al ver aves presenta los promedios para cada ambiente (Fig. 2). Se observa que no existen diferencias en la satisfacción, ni entre marino y terrestres o modificados y naturales. Sin embargo la dispersión en ambientes modificados es mayor. Existe un número mayor de personas que indican bajos niveles de satisfacción al ver aves en ambientes modificados.
+
+
+```{r,fig.cap="Fig 2. Satisfacción percibida al ver aves en los seis ambientes presentes en las ciudades costeras"}
+#Figura comparativa con los ambientes trabajados en monitoreo visual de aves
+
+Avance <- readRDS("DatosAvance.rds")  %>%dplyr::filter(!is.na(Ambiente_bienestar)) 
+
+Avance <- Avance %>% mutate(Environment = case_when(Ambiente == "PlayaInt"| Ambiente =="PlayaNat"~"Beach",
+                            Ambiente =="RocaInt"| Ambiente =="RocaNat"~"Rocky shore",
+                            Ambiente =="Urbano" | Ambiente == "Verde"~"Inland")) %>% 
+mutate(Intervention=case_when(Ambiente=="PlayaInt"|Ambiente=="RocaInt"|Ambiente=="Urbano"~"Modified",
+                                    Ambiente=="PlayaNat"|Ambiente =="RocaNat"|Ambiente=="Verde"~"Natural"))
+
+
+ggplot(Avance, aes(y=Ambiente_bienestar, x=Intervention)) + geom_boxplot(notch=T) + theme_bw()+ facet_grid(Environment~.) + xlab("Habitat intervention") +ylab("Perceived satisfaction when birds are seen")
+
+#mayor dispersion en ambientes modificados. En ambientes naturales la satisfaccion dde ver aves es parejamente alta.
+
+Avance <- Avance %>% mutate(Ambiente=fct_relevel(Ambiente, "Urbano", "Verde", "RocaInt", "PlayaInt", "PlayaNat"))
+ggplot(Avance, aes(x=Ambiente, y=Ambiente_bienestar)) + geom_boxplot(notch=TRUE) +geom_jitter(aes(color=Ambiente))+theme_classic()+
+  xlab("Ambientes")+ ylab("Bienestar al ver aves")
+
+```
+
+
+
+Los servicios entregados por las aves son similares entre ambientes, en donde la mayor cantidad de encuestados indicó que el comportamiento de las aves era lo que generaba más agrado al verlas (Fig.3 y Tabla 1). Esto se relaciona con el gusto de ver a las aves cantando, volando o comiendo principalmente. El segundo servicio más mencionado es la familiaridad y se relaciona con que a las personas les gusta ver que las aves se acercan a ellos, asi como también el hecho de verlas en los mismos lugares de forma común.
+
+
+```{r}
+
+Avance <- readRDS("DatosAvance.rds")  %>%dplyr::filter(!is.na(Ambiente_bienestar)) 
+Avance <- Avance %>% 
+    mutate(Relacion_MarNCP= case_when(Relacion_MarNCP== "NO MATERIAL- Exp. fís. y psic."~"NON MATERIAL- Physical and psychological experiences",
+                                      Relacion_MarNCP== "NO MATERIAL- Sop. identidad"~ "NON MATERIAL- Supporting identities", 
+                                      Relacion_MarNCP== "NO MATERIAL- Aprendizaje e insp."~"NON MATERIAL- Learning and inspiration ",
+                                      Relacion_MarNCP== "MATERIAL- Materiales y asistencia"~"MATERIAL- Materials, companionship and labor",
+                                      Relacion_MarNCP== "MATERIAL- Alimentación"~"MATERIAL- Food and feed " ,
+                                      Relacion_MarNCP== "REGULACIÓN- Reg. cal. aire"~"REGULATION-Regulation of air quality" )) %>% mutate(Relacion_MarNCP= str_wrap(Relacion_MarNCP, 15)) 
+
+ggplot(Avance, aes(x=Relacion_MarNCP, y=Ambiente_bienestar)) + geom_boxplot(notch=TRUE) +theme_classic()+ xlab("Relacion_MarNCP")+ ylab("Bienestar al ver aves") + theme(axis.text.x = element_text(angle=0, vjust= 1, hjust=0.5))
+
+ggplot(Avance) + geom_bar(aes(Relacion_MarNCP), color ="black")+ theme_classic()+
+  ylab("Número de respuestas") + xlab("Servicios percibidos de las aves")+
+facet_grid(Ambiente~.)
+
+
+
+```
+
+
+
+```{r, fig.cap="Fig 3. Servicios percibidos por las aves en distintos ambientes"}
+#Figura comparativa con los ambientes servicios de aves
+
+Total_agradoCH <- Avance %>% dplyr::select(AgradoCH,Ambiente) %>% 
+  filter(AgradoCH %in% c("Comportamiento", "Estética", "Familiaridad", "Simbolismo")) 
+  
+
+ggplot(Total_agradoCH) + geom_bar(aes(AgradoCH), color ="black")+ theme_classic()+
+  ylab("Número de respuestas") + xlab("Servicios percibidos de las aves")+
+facet_grid(Ambiente~.)
+
+
+```
+
+```{r}
+#Tabla comparativa con los ambientes servicios de aves
+Total_agradoCH<- Total_agradoCH %>% 
+  group_by(AgradoCH, Ambiente) %>% 
+  summarise(N=n()) %>% 
+  rename(Servicio= AgradoCH) 
+
+kable(Total_agradoCH, align = "l", caption = "Tabla 1") %>%
+ kable_paper(full_width = F) %>%
+collapse_rows(columns = 1, valign = "top")
+
+```
+
+
+
+Los dis-servicios entregados por las aves presentan diferencias entre ambientes, de forma comparativa son más altos en ambientes modificados que en naturales y semi-naturales (Fig. 4 y Tabla 2). En este caso, la mayor cantidad de encuestados indicó que el comportamiento de las aves era lo que generaba más desagrado al verlas. Esto se relaciona principalmente con la alimentación de algunas especies que suelen meterse en la basura y cuando las aves defecan en lugares públicos. El segundo dis-servicio más mencionado es la familiaridad y se relaciona con que a algunas personas no les agrada como las aves se acercan a ellos en espacios publicos en busca de alimentos.
+
+
+```{r, fig.cap="Fig 4. Dis-servicios percibidos por las aves en distintos ambientes"}
+#Figura comparativa con los ambientes servicios de aves
+
+Total_DesagradoCH <- Avance %>% dplyr::select(DesagradoCH,Ambiente) %>% 
+  filter(DesagradoCH %in% c("Comportamiento", "Estética", "Familiaridad", "Simbolismo")) 
+
+ggplot(Total_DesagradoCH) + geom_bar(aes(DesagradoCH), color ="black")+ theme_classic()+
+  ylab("Número de respuestas") + xlab("Dis-servicios percibidos de las aves")+
+facet_grid(Ambiente~.)
+
+
+```
+
+```{r}
+#Tabla comparativa con los ambientes servicios de aves
+
+Total_DesagradoCH <- Total_DesagradoCH %>% 
+group_by(DesagradoCH, Ambiente) %>% 
+  summarise(N=n()) %>% 
+    rename(Disservicio=DesagradoCH) 
+
+kable(Total_DesagradoCH, align = "l", caption = "Tabla 2") %>%
+ kable_paper(full_width = F) %>%
+collapse_rows(columns = 1, valign = "top")
+
+```
+
+
+
+
+Valores de bienestar expresados por las personas se muestran separados por especies por cada ambiente consultado (Fig.5).
+En el caso de las tres especies terrestres, las personas consideraron valores altos de bienestar con *Columba livia* en ambientes interiores (urbano y verde). Se mencionaron niveles altos de bienestar al ver *Zonotrichia capensis* en todos los ambientes, con excepción de la playa natural donde fue bajo. Para el *Turdus flacklandii*, su presencia generó valores altos de bienestar en urbano, verde y playa intervenida.
+
+En el caso de las especies marinas, las personas expresaron valores altos de bienestar para las tres especies en ambientes marinos. Particularmente, las personas expresaron menor beneficio en ambientes interiores respecto a *Larus dominicanus*. Mientras que para *Phalacrocoras brasilianus* el beneficio presentado en ambientes marinos es alto, pero no tan alto como las otras dos especies marinas, excepto en roca natural.
+
+```{r, fig.cap="Fig 5. Beneficio percibido por seis especies dde aves en los seis ambientes consultados de las ciudades costeras"}
+
+Avance2 <- read_rds("DatosAvance2.rds") %>% mutate(Ambiente=fct_relevel(Ambiente, "Urbano", "Verde", "RocaInt", "PlayaInt", "PlayaNat"))
+Avance2 <- Avance2 %>% 
+  mutate(Especie = case_when(Especie == "Columba" ~ "Columba livia",
+                             Especie == "Larus" ~ "Larus dominicanus",
+                             Especie == "Pele" ~"Pelecanus thagus",
+                             Especie == "Phalacrocorax" ~"Phalacrocorax brasilianus",  
+                             Especie == "Turdus" ~"Turdus falcklandii",
+                             Especie == "Zonotrichia" ~"Zonotrichia capensis")) %>% 
+  mutate(Especie=fct_relevel(Especie, "Columba livia", "Zonotrichia capensis", "Turdus falcklandii", "Larus dominicanus", "Phalacrocorax brasilianus", "Pelecanus thagus")) %>% 
+  mutate(Environment = case_when(Ambiente == "PlayaNat"~"Natural beach",
+                                 Ambiente == "PlayaInt"~"Urbanised beach",
+                            Ambiente =="RocaNat"~"Natural rocky shore",
+                              Ambiente =="RocaInt"~"Modified rocky shore",
+                            Ambiente =="Urbano" ~"Urban core",
+                            Ambiente == "Verde"~"Green area"))
+
+
+Avance2$Beneficio_sp_amb <- ifelse(Avance2$Beneficio_sp_amb == 0, NA, Avance2$Beneficio_sp_amb)
+
+Avance2 <- Avance2 %>% 
+  mutate(Environment=fct_relevel(Environment,"Green area", "Urban core","Natural beach","Urbanised beach",      "Natural rocky shore","Modified rocky shore"))
+
+
+ggplot(Avance2, aes(x=Environment, y=Beneficio_sp_amb)) + geom_boxplot(notch=F) + facet_wrap(~Especie)+theme_classic()+ xlab("Environments")+ ylab("Well-being by species")+theme(axis.text.x = element_text(angle=45, vjust= 1, hjust=1))
+
+
+```
+
+
+```{r}
+
+library(patchwork)
+B <-ggplot(Avance2, aes(x=FrecPercibida, y=Beneficio_sp_amb))+ geom_smooth(method=lm, se=FALSE,aes(color=Especie))+
+  geom_point(aes(color=Especie)) +  xlab("Perceived frecuency by species")+ylab("Well-being perceived by species in different environments") +theme_classic() +scale_colour_discrete(name="Bird species")+ggtitle('B')
+A <-ggplot(Avance2, aes(x=FrecPercibida, y=Beneficio_sp_amb))+ geom_smooth(method=lm, se=FALSE,aes(color=Environment))+
+  geom_point(aes(color=Environment))+ xlab("Perceived frecuency by species")+ylab("Well-being perceived by species in different environments") +theme_classic() +scale_colour_discrete(name="Coastal environments")+ggtitle('A')
+
+A+B
+```
+
+
+
+
+```{r}
+
+ggplot(Avance2, aes(x=FrecPercibida, y=Beneficio_sp_amb))+ ylim(1,7)+ geom_point()+geom_smooth(method=lm) + facet_grid(vars(Environment), vars(Especie))+ xlab("Perceived frecuency by species")+ ylab("Well-being perceived by species in different environments") + theme_bw()
+
+ # +scale_colour_discrete(name="Coastal environments") + ggtitle('A')
+
+
+```
+
+
+Comparaciones entre la frecuencia observada y percibida muestran diferencias para las distintas especies y ambientes (Tabla 3).
+*Columba livia* presenta frecuencias similares en todos los ambientes, con excepción del roquerío natural. Las personas perciben que este ambiente es regularmente visitado por esta especie (probabilidad de un 42.9% de ser percibida en un día), sin embargo los muestreos indicaron que no era un ambiente visitado por la especie (probabilidad de un 0% de que la especie ocupe ese ambiente en un día).
+*Larus dominicanus* presenta frecuencias similares también y solo muestra diferencias en los ambientes interiores. Esta especie presenta una probabilidad de un 100% de ocupar cualquier ambiente en un día, sin embargo en ambientes urbanos y areas verdes, las personas perviben que la probabilidad de ver esta especie en un dia es menor (71.4% y 50%, respectivamente).
+*Pelecanus thagus* presenta frecuencias observadas y percibidas similares para cada ambiente. *Phalacrocorax brasilianus* tambien presenta frecuencias similares, con exceepción de la playa natural, donde la especie presenta un 100% de probabilidad de ocupar ese ambiente en un día, pero un 57.1% e ser percibida en un día.
+
+Las últimas dos especies terrestres presentan más diferencias entre frecuencias por ambiente. Para *Turdus falcklandii* las mayores diferencias se encuentran para roquerío natural (frecuencia percibida es mayor a la observada) y roquerío modificado (baja frecuencia percibida  en comparación con la frecuencia observada).
+Para *Zonotrichi capensis* las mayores diferencias se encuentran para roquerío modificado, roquerío natural y playa natural (frecuencia percibida es menor a la observada).
+
+
+
+```{r}
+
+#Frecuency comparision
+
+TablaFrecComp <- read_rds("TablaFrecComp.rds") %>% 
+  mutate(Species = case_when(Species == "Columba_livia" ~ "Columba livia",
+                             Species == "Larus_dominicanus" ~ "Larus dominicanus",
+                             Species == "Pelecanus_thagus" ~"Pelecanus thagus",
+                             Species == "Phalacrocorax_brasilianus" ~"Phalacrocorax brasilianus",  
+                             Species == "Turdus_falcklandii" ~"Turdus falcklandii",
+                             Species == "Zonotrichia_capensis" ~"Zonotrichia capensis")) %>% 
+  rename(Environment = Ambiente)
+         
+
+
+kable(TablaFrecComp, align = "l", caption = "Tabla 3. Comparación de frecuencias observadas y esperadas de seis especies de aves comunes en ciudades costeras") %>%
+  kable_paper(full_width = F) %>%
+  column_spec(1, italic = T) %>%
+  collapse_rows(columns = 1, valign = "top") 
+  
+
+
+
+```
+
+
+En relación al origen de las especies, si son marinos o terrestres, la mayoría de las personas acierta al origen de cada una de cada una de ellas (Tabla 4). Solo *Phalacrocorax brasilianus* presenta una menor tasa de acierto con un 75%, donde un 25% de los consultados piensa que esta especie es terrestre.
+
+
+```{r}
+Origen_sp <- Avance2 %>% 
+  dplyr::select(ID_encuesta,Especie, Origen) %>% 
+  distinct() %>% 
+  mutate(Origen=case_when(is.na(Origen)~ "No sabe/no responde",
+                          !is.na(Origen) ~ Origen)) %>% 
+group_by(Especie, Origen) %>% 
+  summarise("Proporción respuestas" = round(n()*100/52, 2)) 
+
+kable(Origen_sp, align = "l", caption = "Tabla 4. Proporción de respuestas sobre el origen de las aves") %>%
+  kable_paper(full_width = F) %>%
+  column_spec(1, italic = T) %>%
+  collapse_rows(columns = 1, valign = "top") 
+  
+```
+
+
+##### Discusión-Conclusión
+
+Si bien las personas gustan de ver aves en los distintos ambientes y perciben un bienestar o satisfacción en ellos, los ambientes modificados presentan niveles más bajos de bienestar. Esto se podría relacionar principalmente en que en estos ambientes las aves comparten espacio con el hombre y en ellos no solo se aprecian sus servicios (escuchar sus cantos, verlos comer, verlos volar) sino que tambien sus dis-servicios (verlos entre la basura buscando comida o defecando en espacios públicos). Los dis-servicios podrían ser más altos en ambientes con mayor intervención humana dado que las aves se encontrarían más cercanas a un mayor número de personas.
+
+El beneficio de ver aves se encontraría determinado por la naturalidad de las aves en los distintos ambientes. Esto estaría definido por lo que las personas consideran el origen del ave (marino o terrestre) y la frecuencia percibida (probabilidad promedio de ver un ave en un determinado ambiente en un día). 
+
+Por ejemplo, *Columba livia* es percibida como una especie terrestre y común de ver tanto en ambientes urbanos como areas verdes, las personas expresan un mayor beneficio al verla en estos ambientes. 
+Las especies marinas son reconocidas como tales y las personas presentan mayor bienestar al verlas en ambientes marinos. Coincidentemente, las notas más bajas de bienestar en ambientes marinos corresponden a lugares en donde la personas dijeron que la espece no era comun de ver. Esto reafirma la idea de mayor beneficio percibido al ver especies que son naturales de un lugar (o que las personas consideran natural).
+
+
+
+
+
+

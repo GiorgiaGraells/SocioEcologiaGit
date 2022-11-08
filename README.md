@@ -4,13 +4,13 @@ Socio Ecologia
 ## GitHub Documents
 
 Antes de partir actualizar base de datos de las encuestas:
-**/EncuestaAvesRegistro/respuestas\_COMPLETO.csv**
+**/EncuestaAvesRegistro/respuestas_COMPLETO.csv**
 
 Distintos graficos exploratorios:
 
-  - **Preliminar general.R**
-  - **Preliminar por ambiente.R**
-  - **Preliminar por especie.R**
+-   **Preliminar general.R**
+-   **Preliminar por ambiente.R**
+-   **Preliminar por especie.R**
 
 En estos mismo archivos se incluyen gráficos de boxplot para mejor
 representacion de los datos con 95% IC. Para esto se trabaja con la
@@ -19,12 +19,12 @@ el ambiente por el cual se pregunta
 
 ### Análisis
 
-Primer intento de analisis de vías: **PLS\_PathAnalysis.R** a partir de:
-**Prep datos outer model.R** y **Post\_PathAnalysis.R**
+Primer intento de analisis de vías: **PLS_PathAnalysis.R** a partir de:
+**Prep datos outer model.R** y **Post_PathAnalysis.R**
 
 Analisis preliminares utilizando ordered logistic regression, para
 presentar como alternativa de 55 réplicas **RegLog.Rmd**. Intento de
-analisis de poder en **Poder\_OLR.R**.
+analisis de poder en **Poder_OLR.R**.
 
 #### Diciembre 2020
 
@@ -46,3 +46,9 @@ factor aleatorio. Se utilizó la funcion clmm en el docuemnto
 describe la ecuacion del modelo ambiental seleccionado y **Curvas.R**
 desde donde se extrae la iformacin de los modelos para armar las
 predicciones y los graficos para las variables seleccionadas.
+
+##### Manuscrito
+
+Se preparó el borrador en **manuscrito.Rmd** en donde se encuentran las
+tablas y figuras exploratorias utilizadas para escribir el articulo que
+esta siendo revisado en googleDocs
