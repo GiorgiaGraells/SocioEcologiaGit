@@ -147,8 +147,21 @@ Avance <- Avance %>% mutate(Environment = case_when(Ambiente == "PlayaInt"| Ambi
 mutate(Intervention=case_when(Ambiente=="PlayaInt"|Ambiente=="RocaInt"|Ambiente=="Urbano"~"Modified",
                                     Ambiente=="PlayaNat"|Ambiente =="RocaNat"|Ambiente=="Verde"~"Natural"))
 
-
 ggplot(Avance, aes(y=Ambiente_bienestar, x=Intervention)) + geom_boxplot(notch=T) + theme_bw()+ facet_grid(Environment~.) + xlab("Habitat intervention") +ylab("Perceived satisfaction when birds are seen")
+
+
+```
+
+```{r,fig.cap="Fig 2. Satisfacción percibida al ver aves en los seis ambientes presentes en las ciudades costeras"}
+#Figura comparativa con los ambientes trabajados en monitoreo visual de aves
+
+Avance <- readRDS("DatosAvance.rds")  %>%dplyr::filter(!is.na(Ambiente_bienestar)) 
+
+Avance <- Avance %>% mutate(Environment = case_when(Ambiente == "PlayaInt"| Ambiente =="PlayaNat"~"Beach",
+                            Ambiente =="RocaInt"| Ambiente =="RocaNat"~"Rocky shore",
+                            Ambiente =="Urbano" | Ambiente == "Verde"~"Inland")) %>% 
+mutate(Intervention=case_when(Ambiente=="PlayaInt"|Ambiente=="RocaInt"|Ambiente=="Urbano"~"Modified",
+                                    Ambiente=="PlayaNat"|Ambiente =="RocaNat"|Ambiente=="Verde"~"Natural"))
 
 #mayor dispersion en ambientes modificados. En ambientes naturales la satisfaccion dde ver aves es parejamente alta.
 
@@ -157,7 +170,6 @@ ggplot(Avance, aes(x=Ambiente, y=Ambiente_bienestar)) + geom_boxplot(notch=TRUE)
   xlab("Ambientes")+ ylab("Bienestar al ver aves")
 
 ```
-
 
 
 Los servicios entregados por las aves son similares entre ambientes, en donde la mayor cantidad de encuestados indicó que el comportamiento de las aves era lo que generaba más agrado al verlas (Fig.3 y Tabla 1). Esto se relaciona con el gusto de ver a las aves cantando, volando o comiendo principalmente. El segundo servicio más mencionado es la familiaridad y se relaciona con que a las personas les gusta ver que las aves se acercan a ellos, asi como también el hecho de verlas en los mismos lugares de forma común.
@@ -253,7 +265,7 @@ En el caso de las tres especies terrestres, las personas consideraron valores al
 
 En el caso de las especies marinas, las personas expresaron valores altos de bienestar para las tres especies en ambientes marinos. Particularmente, las personas expresaron menor beneficio en ambientes interiores respecto a *Larus dominicanus*. Mientras que para *Phalacrocoras brasilianus* el beneficio presentado en ambientes marinos es alto, pero no tan alto como las otras dos especies marinas, excepto en roca natural.
 
-```{r, fig.cap="Fig 5. Beneficio percibido por seis especies dde aves en los seis ambientes consultados de las ciudades costeras"}
+```{r, fig.cap="Fig 5. Beneficio percibido por seis especies dde aves en los seis ambientes consultados de las ciudades costeras", cache=T}
 
 Avance2 <- read_rds("DatosAvance2.rds") %>% mutate(Ambiente=fct_relevel(Ambiente, "Urbano", "Verde", "RocaInt", "PlayaInt", "PlayaNat"))
 Avance2 <- Avance2 %>% 
